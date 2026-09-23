@@ -142,6 +142,8 @@ table.lagen td.topl{opacity:.5}
 .rules span{color:var(--muted)}
 .pls{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:6px}
 .plf .fld{grid-template-columns:1fr 80px}
+table.plt input{width:74px}
+table.plt th[scope=row]{white-space:nowrap}
 #summary{margin-top:22px;border-top:3px solid var(--ink);padding-top:14px}
 .lead{margin:0 0 10px;color:var(--muted)}
 .big{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px 26px}
@@ -289,7 +291,7 @@ function fillCustom(need,S){
 }
 const DEFAULTS = {
   method:'meest', target:100, avgEng:2, avgSpr:2, avgWest:20, ptsEng:10, ptsWest:100, racesPerDay:4,
-  includeFees:true, pl:{eng:[0,0,0],west:[0,0,0]}, rest:2, activeHours:12, lessonXP:4,
+  includeFees:true, pl:{dres:[0,0,0],spr:[0,0,0],rei:[0,0,0],tra:[0,0,0],wp:[0,0,0]}, rest:2, activeHours:12, lessonXP:4,
   avail:{10:false,11:false,12:false,13:false,14:false,15:false,16:false,17:true,18:false,19:false,20:true},
   trainerXPs:{10:5,11:5,12:4,13:4,14:3,15:3,16:3,17:1,18:1,19:1,20:1},
   raceXP:50,
@@ -300,7 +302,7 @@ const DEFAULTS = {
 };
 
 function avgFor(d,S){ return d.id==='spr'?S.avgSpr:d.group==='eng'?S.avgEng:S.avgWest; }
-function prizeFactor(d,S){ const p=(S.pl&&S.pl[d.group])||[0,0,0]; return (+p[0]+0.5*p[1]+0.25*p[2])/100; }
+function prizeFactor(d,S){ const p=(S.pl&&S.pl[d.id])||[0,0,0]; return (+p[0]+0.5*p[1]+0.25*p[2])/100; }
 function promoXPFor(i,S){ return S.promoStep*(i+2); }
 function methodSteps(id,S){
   const pr=S.prices, trainer=ps=>ps.map(p=>({p,c:+pr[p],xp:+(S.trainerXPs[p]||0)}));
@@ -447,7 +449,7 @@ function simulate(stratId,S,methodId,from){
 function groupCombo(c){const g=[];for(const p of c){const l=g.at(-1);if(l&&l.p===p)l.n++;else g.push({p,n:1});}return g.map(x=>(x.n>1?x.n+' × ':'')+x.p+'%').join(' + ');}
 const KEY='hn-trainingscentrum-v1';
 let S=JSON.parse(JSON.stringify(DEFAULTS));
-try{const raw=localStorage.getItem(KEY); if(raw){const o=JSON.parse(raw); S={...S,...o,prices:{...S.prices,...(o.prices||{})},horse:{...S.horse,...(o.horse||{})},planOrder:(o.planOrder&&o.planOrder.length===5)?o.planOrder:S.planOrder,custom:{...S.custom,...(o.custom||{})},avail:{...S.avail,...(o.avail||{})},trainerXPs:{...S.trainerXPs,...(o.trainerXPs||{})}}; if(o.trainerXPs&&o.trainerXPs[17]===2&&o.trainerXPs[20]===1) S.trainerXPs[17]=1; if(S.raceXP===undefined) S.raceXP=50; if(S.avgSpr===undefined) S.avgSpr=2; if(!S.pl) S.pl={eng:[0,0,0],west:[0,0,0]}; if(S.promoStep===undefined) S.promoStep=25; if(S.avgSpr>2) S.avgSpr=2; if(!METHODS.some(m=>m.id===S.method)) S.method='meest';}}catch(e){}
+try{const raw=localStorage.getItem(KEY); if(raw){const o=JSON.parse(raw); S={...S,...o,prices:{...S.prices,...(o.prices||{})},horse:{...S.horse,...(o.horse||{})},planOrder:(o.planOrder&&o.planOrder.length===5)?o.planOrder:S.planOrder,custom:{...S.custom,...(o.custom||{})},avail:{...S.avail,...(o.avail||{})},trainerXPs:{...S.trainerXPs,...(o.trainerXPs||{})}}; if(o.trainerXPs&&o.trainerXPs[17]===2&&o.trainerXPs[20]===1) S.trainerXPs[17]=1; if(S.raceXP===undefined) S.raceXP=50; if(S.avgSpr===undefined) S.avgSpr=2; if(!S.pl) S.pl={}; if(S.pl.eng||S.pl.west){const e=S.pl.eng||[0,0,0],w=S.pl.west||[0,0,0]; S.pl={dres:[...e],spr:[...e],rei:[...w],tra:[...w],wp:[...w]};} for(const d of DISCS) if(!S.pl[d.id]) S.pl[d.id]=[0,0,0]; if(S.promoStep===undefined) S.promoStep=25; if(S.avgSpr>2) S.avgSpr=2; if(!METHODS.some(m=>m.id===S.method)) S.method='meest';}}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 const nf=n=>Math.round(n).toLocaleString('nl-NL');
 const coin=n=>'Ħ\u202f'+nf(n);
@@ -573,10 +575,8 @@ function vMethoden(){
 
 function vWedstrijden(){
   const k=makeCalc(S,S.method);
-  const seen=new Set(), groups=DISCS.filter(d=>d.group==='eng'||(!seen.has('w')&&seen.add('w')));
   const netCell=v=>`<td class="${v<0?'neg':'pos'}">${signed(v)}</td>`;
-  const plIn=(g,lab)=>`<fieldset class="plf"><legend>${lab}</legend>${['1e','2e','3e'].map((p,i)=>`<label class="fld"><span>${p} plaats (% van je wedstrijden)</span><input type="number" min="0" max="100" data-pl="${g}:${i}" value="${S.pl[g][i]}"></label>`).join('')}</fieldset>`;
-  const hasPl=g=>S.pl[g].some(v=>+v>0);
+  const hasPl=id=>S.pl[id].some(v=>+v>0);
   return `<h2>Wat levert één wedstrijd op?</h2>
   <p class="intro">Na een wedstrijd staan alle balkjes op 50%. Voor de volgende wedstrijd train je ze terug naar ${S.target}% en betaal je inschrijfgeld. Daar staat prijzengeld tegenover: de 1e plaats krijgt de hoofdprijs, de 2e de helft en de 3e een kwart. Elke wedstrijd geeft je ook ${S.raceXP} XP.</p>
   <div class="rules">
@@ -586,12 +586,14 @@ function vWedstrijden(){
     <div><b>Promoveren</b><span>Handmatig vanaf 10 punten (Western 100), automatisch bij 30 (Western 300). Promotie-XP groeit met het niveau: 50 XP naar niveau 2, 250 XP naar ZZ-Zwaar.</span></div>
   </div>
   <h3>Hoe vaak eindig je op het podium?</h3>
-  <p class="note" style="margin-top:0">Vul in hoe vaak je ongeveer 1e, 2e of 3e wordt. Dit telt mee in alle berekeningen van de app, als prijzengeld dat je terugverdient.</p>
-  <div class="pls">${plIn('eng','Dressuur en Springen')}${plIn('west','Western')}</div>
-  ${groups.map(d=>{const f=prizeFactor(d,S);return `<h3><span class="dot ${d.group}"></span>${d.group==='west'?'🤠 Western (per discipline)':d.icon+' '+d.name}</h3>
-  <div class="tw"><table><thead><tr><th>Niveau</th><th>Kosten per wedstrijd</th><th>1e</th><th>2e</th><th>3e</th><th>Netto bij 1e</th><th>Netto bij 2e</th><th>Netto bij 3e</th><th>Netto zonder podium</th>${hasPl(d.group)?'<th>Gemiddeld netto</th>':''}</tr></thead><tbody>
-  ${d.levels.map((l,i)=>{const r=k.racePerLevel(d,i),p=r.prize;return `<tr><th scope="row">${r.name}</th><td><b>${coin(r.cost)}</b><small class="blk">${r.fee?coin(r.fee)+' inschrijving':'gratis inschrijving'}</small></td><td>${coin(p)}</td><td>${coin(p/2)}</td><td>${coin(p/4)}</td>${netCell(p-r.cost)}${netCell(p/2-r.cost)}${netCell(p/4-r.cost)}${netCell(-r.cost)}${hasPl(d.group)?netCell(p*f-r.cost):''}</tr>`}).join('')}
-  </tbody></table></div>`;}).join('')}
+  <p class="note" style="margin-top:0">Vul per discipline in welk deel van je wedstrijden je 1e, 2e of 3e wordt, in procenten. Dit telt mee in alle berekeningen van de app, als prijzengeld dat je terugverdient.</p>
+  <div class="tw"><table class="narrow plt"><thead><tr><th>Discipline</th><th>1e plaats %</th><th>2e plaats %</th><th>3e plaats %</th><th>Geen podium</th><th>Gemiddeld van de hoofdprijs</th></tr></thead><tbody>
+  ${DISCS.map(d=>{const p=S.pl[d.id], rest=Math.max(0,100-p.reduce((a,x)=>a+ +x,0)), f=prizeFactor(d,S); return `<tr><th scope="row"><span class="dot ${d.group}"></span>${d.name}</th>${[0,1,2].map(i=>`<td><input type="number" min="0" max="100" data-pl="${d.id}:${i}" value="${p[i]}" aria-label="${d.name} ${i+1}e plaats procent"></td>`).join('')}<td>${p.reduce((a,x)=>a+ +x,0)>100?'<span class="warn">meer dan 100%</span>':rest+'%'}</td><td>${Math.round(f*100)}%</td></tr>`;}).join('')}
+  </tbody></table></div>
+  ${DISCS.map(d=>`<h3><span class="dot ${d.group}"></span>${d.icon} ${d.name}</h3>
+  <div class="tw"><table><thead><tr><th>Niveau</th><th>Kosten per wedstrijd</th><th>1e</th><th>2e</th><th>3e</th><th>Netto bij 1e</th><th>Netto bij 2e</th><th>Netto bij 3e</th><th>Netto zonder podium</th>${hasPl(d.id)?'<th>Gemiddeld netto</th>':''}</tr></thead><tbody>
+  ${d.levels.map((l,i)=>{const r=k.racePerLevel(d,i),p=r.prize,f=prizeFactor(d,S);return `<tr><th scope="row">${r.name}</th><td><b>${coin(r.cost)}</b><small class="blk">${r.fee?coin(r.fee)+' inschrijving':'gratis inschrijving'}</small></td><td>${coin(p)}</td><td>${coin(p/2)}</td><td>${coin(p/4)}</td>${netCell(p-r.cost)}${netCell(p/2-r.cost)}${netCell(p/4-r.cost)}${netCell(-r.cost)}${hasPl(d.id)?netCell(p*f-r.cost):''}</tr>`}).join('')}
+  </tbody></table></div>`).join('')}
   <p class="note">Kosten per wedstrijd zijn het inschrijfgeld plus het terugtrainen van 50% naar ${S.target}% met ${mName(S.method).toLowerCase()}.</p>`;
 }
 
