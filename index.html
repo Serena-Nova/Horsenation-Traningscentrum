@@ -238,7 +238,7 @@ table.tset th small{display:block}
 <script>
 const PRICES_DEFAULT = {10:25,11:29,12:32,13:36,14:39,15:43,16:46,17:50,18:53,19:57,20:60};
 const PRICE_NOTE = {13:'geschat',16:'teruggerekend',18:'teruggerekend',19:'geschat'};
-const XP_KNOWN = {10:true,20:true};
+const XP_KNOWN = {10:true,17:true,20:true};
 const W = (bars,fee,prize,n)=>({n,bars,fee,prize});
 const WEST_LEVELS = [W(2,0,800,'L5'),W(4,75,1500,'L4'),W(5,200,3000,'L3'),W(5,600,5000,'L2'),W(5,750,7500,'L1')];
 const DISCS = [
@@ -286,7 +286,8 @@ const DEFAULTS = {
   method:'meest', target:100, avgEng:2, avgWest:20, ptsEng:10, ptsWest:100, racesPerDay:4,
   includeFees:true, prizePct:0, rest:2, activeHours:12, lessonXP:4,
   avail:{10:false,11:false,12:false,13:false,14:false,15:false,16:false,17:true,18:false,19:false,20:true},
-  trainerXPs:{10:5,11:5,12:4,13:4,14:3,15:3,16:3,17:2,18:2,19:1,20:1},
+  trainerXPs:{10:5,11:5,12:4,13:4,14:3,15:3,16:3,17:1,18:1,19:1,20:1},
+  raceXP:50,
   priceGezellig:15, priceActief:20, prices:{...PRICES_DEFAULT},
   promoXP:50, comboEngCoins:5000, comboEngXP:500, comboWestCoins:5000, comboWestXP:500, allCoins:15000, allXP:1250,
   horse:{dres:0,spr:0,rei:0,tra:0,wp:0},
@@ -331,7 +332,7 @@ function makeCalc(S,methodId){
     const r=fb(T-50), again=(races-1)*L.bars;
     cost+=again*r.cost; clicks+=again*r.clicks; xp+=again*r.xp;
     const fees=S.includeFees?races*L.fee:0, prize=races*L.prize*S.prizePct/100;
-    return {name:L.n,bars:L.bars,starts,races,train:cost,fees,total:cost+fees,clicks,xp:xp+S.promoXP,prize,minutes:clicks*S.rest,level:L};
+    return {name:L.n,bars:L.bars,starts,races,train:cost,fees,total:cost+fees,clicks,xp:xp+S.promoXP+races*S.raceXP,prize,minutes:clicks*S.rest,level:L};
   }
   function disc(d,from=0){
     const lv=[]; for(let i=from;i<d.levels.length-1;i++) lv.push(level(d,i));
@@ -438,7 +439,7 @@ function simulate(stratId,S,methodId,from){
 function groupCombo(c){const g=[];for(const p of c){const l=g.at(-1);if(l&&l.p===p)l.n++;else g.push({p,n:1});}return g.map(x=>(x.n>1?x.n+' × ':'')+x.p+'%').join(' + ');}
 const KEY='hn-trainingscentrum-v1';
 let S=JSON.parse(JSON.stringify(DEFAULTS));
-try{const raw=localStorage.getItem(KEY); if(raw){const o=JSON.parse(raw); S={...S,...o,prices:{...S.prices,...(o.prices||{})},horse:{...S.horse,...(o.horse||{})},planOrder:(o.planOrder&&o.planOrder.length===5)?o.planOrder:S.planOrder,custom:{...S.custom,...(o.custom||{})},avail:{...S.avail,...(o.avail||{})},trainerXPs:{...S.trainerXPs,...(o.trainerXPs||{})}}; if(!METHODS.some(m=>m.id===S.method)) S.method='meest';}}catch(e){}
+try{const raw=localStorage.getItem(KEY); if(raw){const o=JSON.parse(raw); S={...S,...o,prices:{...S.prices,...(o.prices||{})},horse:{...S.horse,...(o.horse||{})},planOrder:(o.planOrder&&o.planOrder.length===5)?o.planOrder:S.planOrder,custom:{...S.custom,...(o.custom||{})},avail:{...S.avail,...(o.avail||{})},trainerXPs:{...S.trainerXPs,...(o.trainerXPs||{})}}; if(o.trainerXPs&&o.trainerXPs[17]===2&&o.trainerXPs[20]===1) S.trainerXPs[17]=1; if(S.raceXP===undefined) S.raceXP=50; if(!METHODS.some(m=>m.id===S.method)) S.method='meest';}}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 const nf=n=>Math.round(n).toLocaleString('nl-NL');
 const coin=n=>'Ħ\u202f'+nf(n);
@@ -552,9 +553,9 @@ function vMethoden(){
   return `<h2>Trainingsmethoden naast elkaar</h2>
   <p class="intro">Alles voor een volledige training, dus alle vijf disciplines tot het hoogste niveau. Klik een rij aan om die methode te kiezen.</p>
   <div class="tw"><table class="pick"><thead><tr><th>Methode</th><th>Training</th><th>Totaal</th><th>Klikjes</th><th>Rusttijd</th><th>Trainings-XP</th><th>Min. dagen</th></tr></thead><tbody>
-  ${res.map(({m,r})=>`<tr data-method="${m.id}" tabindex="0" class="${m.id===S.method?'cur':''}"><th scope="row">${m.name}<small>${m.sub}</small></th><td>${coin(r.train)}</td><td class="${r.total===minT?'best':''}"><b>${coin(r.total)}</b></td><td class="${r.clicks===minC?'best':''}">${nf(r.clicks)}</td><td>${tm(r.minutes)}</td><td>${nf(r.xp-S.promoXP*(9+4*4))}</td><td>${r.days}</td></tr>`).join('')}
+  ${res.map(({m,r})=>`<tr data-method="${m.id}" tabindex="0" class="${m.id===S.method?'cur':''}"><th scope="row">${m.name}<small>${m.sub}</small></th><td>${coin(r.train)}</td><td class="${r.total===minT?'best':''}"><b>${coin(r.total)}</b></td><td class="${r.clicks===minC?'best':''}">${nf(r.clicks)}</td><td>${tm(r.minutes)}</td><td>${nf(r.xp-S.promoXP*(9+4*4)-r.races*S.raceXP)}</td><td>${r.days}</td></tr>`).join('')}
   </tbody></table></div>
-  <p class="note">Trainings-XP is de XP die jij als eigenaar per klik krijgt. Bij trainers loopt dat van 5 XP bij 10% naar 1 XP bij 20%. De tussenliggende waarden zijn geschat en kun je aanpassen onder Aannames.</p>
+  <p class="note">Trainings-XP is de XP die jij als eigenaar per klik krijgt: 4 bij een rit of les. Bij een trainer hangt het af van het niveau van de trainer, niet van het percentage dat hij geeft: een beginnende trainer (10%) geeft 5 XP, een mastertrainer maar 1 XP, ook als hij 17% kiest. Daarbovenop krijg je ${S.raceXP} XP per wedstrijd en XP per promotie.</p>
   <h2>Prijs per procent</h2>
   <div class="tw"><table class="narrow"><thead><tr><th>Optie</th><th>Per klik</th><th>Kosten</th><th>Per procent</th><th>Aangeboden</th></tr></thead><tbody>
   ${per.map(([n,p,c,av])=>`<tr class="${av==='zelden'?'dim':''}"><th scope="row">${n}${S.prices[p]!==undefined&&n.startsWith('Trainer')&&PRICE_NOTE[p]?` <small>${PRICE_NOTE[p]}</small>`:''}</th><td>+${p}%</td><td>${coin(c)}</td><td>${(c/p).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td>${av||'altijd'}</td></tr>`).join('')}
@@ -608,6 +609,7 @@ function vAannames(){
     ${num('activeHours','Uren per dag dat je speelt',{min:1,max:24})}
   </fieldset>
   <fieldset><legend>Beloningen</legend>
+    ${num('raceXP','XP per wedstrijd')}
     ${num('promoXP','XP per promotie',{hint:'schatting, tussen 50 en 75'})}
     ${num('comboEngCoins','Fokbonus Engels, munten')}${num('comboEngXP','Fokbonus Engels, XP')}
     ${num('comboWestCoins','Fokbonus Western, munten')}${num('comboWestXP','Fokbonus Western, XP')}
@@ -618,7 +620,7 @@ function vAannames(){
     ${num('lessonXP','XP per les of rit')}
   </fieldset>
   <fieldset class="wide"><legend>Trainers</legend>
-    <p class="note" style="margin:0">Vink aan welke trainers je normaal aangeboden krijgt. De trainer-methoden gebruiken alleen die. Nieuwe trainers beginnen op 10% en groeien naar 20%, dus de lage percentages zie je alleen af en toe.</p>
+    <p class="note" style="margin:0">Vink aan welke trainers je normaal aangeboden krijgt. De trainer-methoden gebruiken alleen die. Nieuwe trainers beginnen op 10% en groeien naar 20%, dus de lage percentages zie je alleen af en toe. De XP hangt af van het niveau van de trainer: mastertrainers geven 1 XP, ook als ze 17% kiezen.</p>
     <div class="tw"><table class="narrow tset"><thead><tr><th>Trainer</th><th>Aangeboden</th><th>Prijs</th><th>XP voor jou</th></tr></thead><tbody>
     ${Object.keys(S.prices).map(p=>`<tr><th scope="row">${p}%${PRICE_NOTE[p]?`<small>prijs ${PRICE_NOTE[p]}</small>`:''}${!XP_KNOWN[p]?`<small>XP geschat</small>`:''}</th>
       <td><input type="checkbox" data-avail="${p}" ${S.avail[p]?'checked':''} aria-label="Trainer ${p}% aangeboden"></td>
@@ -701,7 +703,7 @@ function candidatesAll(from){
   const out={full:[],eng:[],west:[],fok:[],fok18:[]};
   for(const m of METHODS){
     const r=fullFor(m.id,from), byId=Object.fromEntries(r.ds.map(x=>[x.d.id,x]));
-    const pack=(x,extra={})=>({method:m,total:x.total,clicks:x.clicks,minutes:x.minutes,days:x.days,...extra});
+    const pack=(x,extra={})=>({method:m,total:x.total,clicks:x.clicks,minutes:x.minutes,days:x.days,xp:x.xp,...extra});
     out.full.push(pack(r.all)); out.eng.push(pack(r.eng)); out.west.push(pack(r.west));
     for(const f of FOKBONUS){const sel=f.ids.map(id=>byId[id]); const tot=combine(sel,S); const name=f.ids.map(id=>DISCS.find(d=>d.id===id).name).join(' + ');
       const dots=f.sdg.reduce((a,b)=>a+b,0), done=sel.every(x=>x.levels.length===0);
@@ -722,19 +724,20 @@ function winners(list){
     cheap:by((a,b)=>a.total-b.total||a.days-b.days||a.clicks-b.clicks),
     fast:by((a,b)=>a.days-b.days||a.minutes-b.minutes||a.total-b.total),
     clicks:by((a,b)=>a.clicks-b.clicks||a.total-b.total),
+    xp:by((a,b)=>b.xp-a.xp||a.total-b.total),
     paid:[...open.filter(x=>x.method.id!=='gratis')].sort((a,b)=>a.total-b.total||a.days-b.days)[0],
   };
 }
 function bestBlock(title,intro,list,done){
   if(done) return `<h3>${title}</h3><p class="ok">Al bereikt.</p>`;
   const w=winners(list); if(!w.cheap) return '';
-  const row=(lab,x)=>`<tr><th scope="row">${lab}</th><td class="lft"><b>${x.method.name}</b>${x.combo?`<small>${x.combo}${x.dots<18?`, ${x.dots} van 18 bolletjes`:''}</small>`:''}${howText(x.method)}</td><td>${coin(x.total)}</td><td>${nf(x.clicks)}</td><td>${tm(x.minutes)}</td><td>${x.days}</td></tr>`;
+  const row=(lab,x)=>`<tr><th scope="row">${lab}</th><td class="lft"><b>${x.method.name}</b>${x.combo?`<small>${x.combo}${x.dots<18?`, ${x.dots} van 18 bolletjes`:''}</small>`:''}${howText(x.method)}</td><td>${coin(x.total)}</td><td>${nf(x.clicks)}</td><td>${nf(x.xp)}</td><td>${tm(x.minutes)}</td><td>${x.days}</td></tr>`;
   let verdict;
   if(w.cheap===w.fast) verdict=`${w.cheap.method.name}${w.cheap.combo?' met '+w.cheap.combo:''} is hier zowel het goedkoopst als het snelst.`;
   else verdict=`Het goedkoopst is ${coin(w.fast.total-w.cheap.total)} voordeliger dan het snelst, maar duurt ${w.cheap.days-w.fast.days>0?(w.cheap.days-w.fast.days)+' dag'+(w.cheap.days-w.fast.days===1?'':'en')+' langer':'even lang in dagen'} en kost ${tm(Math.max(0,w.cheap.minutes-w.fast.minutes))} meer rusttijd.`;
   return `<h3>${title}</h3>${intro?`<p class="note">${intro}</p>`:''}
-  <div class="tw"><table class="best"><thead><tr><th></th><th class="lft">Kies</th><th>Munten</th><th>Klikjes</th><th>Rusttijd</th><th>Dagen</th></tr></thead><tbody>
-  ${row('Goedkoopst',w.cheap)}${w.paid&&w.paid!==w.cheap?row('Goedkoopst betaald',w.paid):''}${row('Snelst',w.fast)}${row('Minste klikjes',w.clicks)}</tbody></table></div>
+  <div class="tw"><table class="best"><thead><tr><th></th><th class="lft">Kies</th><th>Munten</th><th>Klikjes</th><th>XP</th><th>Rusttijd</th><th>Dagen</th></tr></thead><tbody>
+  ${row('Goedkoopst',w.cheap)}${w.paid&&w.paid!==w.cheap?row('Goedkoopst betaald',w.paid):''}${row('Snelst',w.fast)}${row('Minste klikjes',w.clicks)}${w.xp!==w.cheap?row('Meeste XP',w.xp):''}</tbody></table></div>
   <p class="verdict">${verdict}</p>`;
 }
 function vBeste(){
@@ -749,7 +752,7 @@ function vBeste(){
   ${bestBlock('Volledige training','Alle vijf disciplines tot het hoogste niveau.',c.full,doneG('eng')&&doneG('west'))}
   ${bestBlock('Engels volledig','Dressuur en Springen tot het hoogste niveau.',c.eng,doneG('eng'))}
   ${bestBlock('Western volledig','Reining, Trail en Western Pleasure tot L1.',c.west,doneG('west'))}
-  <p class="note">De dagen gaan uit van maximaal ${S.racesPerDay} wedstrijden per discipline per dag en ${S.activeHours} speeluren per dag. Kosten ${S.includeFees?'inclusief':'zonder'} inschrijfgeld. Dit pas je aan onder Aannames.</p>`;
+  <p class="note">XP is wat jij als eigenaar verdient: per klik, ${S.raceXP} per wedstrijd en per promotie. De beloningen voor de fokbonus en allround zitten er niet in. De dagen gaan uit van maximaal ${S.racesPerDay} wedstrijden per discipline per dag en ${S.activeHours} speeluren per dag. Kosten ${S.includeFees?'inclusief':'zonder'} inschrijfgeld. Dit pas je aan onder Aannames.</p>`;
 }
 
 const simCache={};
