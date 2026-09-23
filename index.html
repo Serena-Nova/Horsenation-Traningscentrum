@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trainingscentrum Horse Nation</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐎</text></svg>">
+<meta name="description" content="Trainingscentrum voor Horse Nation: kosten, klikjes, wedstrijden, fokbonus en planning per paard.">
+<meta name="theme-color" content="#2E5E45">
+
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EEE7;--surface:#F8FAF6;--ink:#1A2A21;--muted:#56695D;--line:#C9D3C8;--accent:#2E5E45;--accent-ink:#F4F8F2;
+  --brass:#9C7418;--eng:#6E3B87;--spr:#2A5CAA;--west:#A95A1B;--pos:#2E6B3F;--neg:#A3322A;--soft:#DDE5DA;
+  --serif:"Bitter",Georgia,"Times New Roman",serif;--sans:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101713;--surface:#17211B;--ink:#E3EAE3;--muted:#98A99E;--line:#2B3A31;--accent:#7FBF98;--accent-ink:#0F1A13;
+  --brass:#D7B25A;--eng:#C79BDB;--spr:#8DB3F0;--west:#E3A36A;--pos:#8FD0A2;--neg:#F0968D;--soft:#223029;color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#101713;--surface:#17211B;--ink:#E3EAE3;--muted:#98A99E;--line:#2B3A31;--accent:#7FBF98;--accent-ink:#0F1A13;
+  --brass:#D7B25A;--eng:#C79BDB;--spr:#8DB3F0;--west:#E3A36A;--pos:#8FD0A2;--neg:#F0968D;--soft:#223029;color-scheme:dark;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:28px clamp(14px,4vw,32px) 64px}
+header h1{font:700 clamp(30px,5vw,46px)/1.05 var(--serif);margin:0 0 6px;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:60ch}
+h2{font:600 22px/1.25 var(--serif);margin:34px 0 10px}
+h3{font:600 17px/1.3 var(--serif);margin:22px 0 8px;display:flex;align-items:center;gap:8px}
+small{color:var(--muted);font-size:12px;display:block;font-weight:400}
+b{font-weight:600}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+.picker{margin-top:26px}
+.picker h2{margin:0 0 10px;font-size:17px}
+#methods{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px}
+.mbtn{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;transition:background .15s,border-color .15s}
+.mbtn .mn{font-weight:600}.mbtn .ms{font-size:12px;color:var(--muted)}
+.mbtn:hover{border-color:var(--accent)}
+.mbtn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.mbtn.on .ms{color:inherit;opacity:.8}
+
+#builder{margin-top:18px}
+#builder h2{margin:0 0 6px;font-size:19px}
+.crow{padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;align-items:center}
+.chip{background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;padding:4px 9px;font-size:13px;font-weight:600}
+.chip.les{background:var(--brass);color:var(--surface)}
+.chip span{opacity:.75;margin-left:3px}
+.clr{background:none;border:0;color:var(--muted);font-size:13px;text-decoration:underline;padding:4px 6px}
+.status{font-size:13px;margin-top:6px}
+.warn{color:var(--neg)}.okt{color:var(--pos)}.muted2{color:var(--muted)}
+.adds{display:flex;flex-wrap:wrap;gap:4px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+.adds button{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12.5px}
+.adds button.les{border-color:color-mix(in srgb,var(--brass) 50%,var(--line))}
+.adds button.rare{opacity:.5;border-style:dashed}
+.adds button:hover{border-color:var(--accent)}
+.track .bs.les{background:var(--brass)}
+.sdg{display:inline-flex;flex-direction:column;gap:3px;vertical-align:middle}
+.sl{display:flex;align-items:center;gap:3px}
+.sl b{font-size:11px;width:12px;color:var(--muted);font-weight:600}
+.sl i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--brass);display:inline-block}
+.sl i.f{background:var(--brass)}
+table.fb td,table.fb th{vertical-align:middle}
+table.fb th[scope=row]{line-height:1.7}
+tr.dim>*{opacity:.55}
+tr.dim th small{opacity:1}
+.bctop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.bctop h2{margin:0}
+.tgl{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 14px;font-size:13.5px}
+.tgl:hover{border-color:var(--accent)}
+.bclosed{padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.csum{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 18px}
+.csum dt{font-size:12.5px;color:var(--muted)}
+.csum dd{margin:0;font-weight:600}
+table.best th[scope=row]{color:var(--muted);font-weight:600;width:130px}
+table.best .lft{text-align:left}
+table.best td.lft small{display:block;margin:0}
+.how{display:block;font-size:12.5px;color:var(--muted);white-space:normal;max-width:52ch;margin-top:3px;line-height:1.45}
+.tag{display:inline-block;margin-bottom:2px;font-size:11.5px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--soft);color:var(--ink);margin-right:4px}
+.tag.own{background:var(--brass);color:var(--surface)}
+.verdict{margin:6px 0 4px;max-width:75ch}
+.order{list-style:none;padding:0;margin:6px 0 0;display:flex;flex-direction:column;gap:4px;max-width:340px;counter-reset:o}
+.order li{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px 6px 10px;counter-increment:o}
+.order li>span:first-child::before{content:counter(o) ".";color:var(--muted);margin-right:8px;font-variant-numeric:tabular-nums}
+.order button{background:none;border:1px solid var(--line);border-radius:5px;width:28px;height:26px;margin-left:4px;font-size:11px}
+.order button:disabled{opacity:.3;cursor:default}
+table.plan td{vertical-align:top}
+.tl{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px 14px;overflow-x:auto}
+.tlaxis{position:relative;height:18px;margin-left:150px;margin-right:70px;font-size:11px;color:var(--muted)}
+.tlaxis span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.tlaxis span:first-child{transform:none}
+.tlrow{display:grid;grid-template-columns:150px 1fr 70px;align-items:center;gap:0;margin-top:6px;min-width:560px}
+.tln{font-size:13.5px;font-weight:500;white-space:nowrap}
+.tltrack{position:relative;height:24px;background:var(--soft);border-radius:5px;overflow:hidden}
+.tlseg{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;color:var(--surface);overflow:hidden;white-space:nowrap}
+.tlseg.eng.s0{background:var(--eng)}.tlseg.eng.s1{background:color-mix(in srgb,var(--eng) 70%,var(--surface))}
+.tlseg.west.s0{background:var(--west)}.tlseg.west.s1{background:color-mix(in srgb,var(--west) 70%,var(--surface))}
+.tlend{position:absolute;top:0;bottom:0;width:3px;background:var(--ink);margin-left:-1px}
+.tldone{font-size:12.5px;text-align:right;color:var(--muted);white-space:nowrap}
+.rpd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:14px 0 4px}
+.rpd small{flex-basis:100%;margin-top:-2px}
+.rpd>span{font-weight:500}
+.rpd .seg{margin:0}
+.phase{display:flex;height:46px;border-radius:8px;overflow:hidden;margin-top:10px}
+.ph{display:flex;flex-direction:column;justify-content:center;padding:0 10px;color:var(--surface);overflow:hidden;white-space:nowrap;min-width:0}
+.ph b{font-size:13px}.ph small{color:inherit;opacity:.85;font-size:11.5px}
+.g1{background:color-mix(in srgb,var(--west) 55%,var(--brass))}.g2{background:var(--west)}.g3{background:color-mix(in srgb,var(--west) 50%,var(--eng))}.g4{background:var(--eng)}.g5{background:var(--muted)}
+.ph.g1,.ph.g2,.ph.g3,.ph.g4{color:var(--surface)}
+.gnum.g1{background:color-mix(in srgb,var(--west) 55%,var(--brass))}.gnum.g2{background:var(--west)}.gnum.g3{background:color-mix(in srgb,var(--west) 50%,var(--eng))}.gnum.g4{background:var(--eng)}.gnum.g5{background:var(--muted)}
+.gnum.g1,.gnum.g2,.gnum.g3,.gnum.g4,.gnum.g5{color:var(--surface)}
+table.sgt thead th{text-align:left}
+table.sgt td:nth-child(5),table.sgt td:nth-child(6),table.sgt td:nth-child(7){white-space:nowrap}
+table.sgt td{text-align:left;white-space:normal}
+table.sgt th[scope=row]{white-space:nowrap}
+table.sgt tr.cur>*{background:color-mix(in srgb,var(--brass) 14%,var(--surface))}
+.phaxis{position:relative;height:20px;font-size:11.5px;color:var(--muted);margin-bottom:10px}
+.phaxis span{position:absolute;top:3px;transform:translateX(-50%);white-space:nowrap}
+.phaxis span:first-child{transform:none;left:0}.phaxis span:last-child{transform:translateX(-100%)}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:8px}
+.grp{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.grp h3{margin:0 0 6px}
+.grp p{margin:6px 0;max-width:60ch}
+.gnum{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--bg);font:600 13px var(--sans)}
+.gfacts{margin:8px 0;display:flex;flex-direction:column;gap:6px}
+.gfacts dt{font-size:12.5px;color:var(--muted)}.gfacts dd{margin:0}
+.tip{font-size:13.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.mine{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:8px;padding:10px 14px;max-width:75ch}
+td.lft{text-align:left;white-space:normal}
+table.lagen td.lc{text-align:left;vertical-align:top}
+table.lagen td.lc b{display:block}
+table.lagen td.lc .pills{margin:3px 0 2px}
+table.lagen td.lc .pill{background:var(--brass);border-color:var(--brass)}
+table.lagen td.topl{opacity:.5}
+#summary{margin-top:22px;border-top:3px solid var(--ink);padding-top:14px}
+.lead{margin:0 0 10px;color:var(--muted)}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px 26px}
+.big>div{display:flex;flex-direction:column;padding:6px 0}
+.big .num{font:700 clamp(26px,4vw,36px)/1.1 var(--serif);letter-spacing:-.01em}
+.big .lab{color:var(--muted);font-size:13px}
+.net{margin:12px 0 0}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+
+#tabs{display:flex;gap:2px;margin-top:30px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+#tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;white-space:nowrap;color:var(--muted);font-weight:500}
+#tabs button.on{color:var(--ink);border-bottom-color:var(--brass)}
+#tabs button:hover{color:var(--ink)}
+
+.intro{color:var(--muted);max-width:72ch;margin:0 0 14px}
+.note{color:var(--muted);font-size:13px;max-width:72ch}
+.tw{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+table.narrow{width:auto;min-width:min(100%,460px)}
+th,td{padding:9px 11px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:middle}
+th[scope=row],thead th:first-child{text-align:left}
+thead th{font-weight:600;font-size:12.5px;color:var(--muted);background:var(--soft)}
+tbody tr:last-child>*{border-bottom:0}
+tr.sum>*{background:var(--soft);font-weight:600}
+td small{display:inline;margin-left:4px}
+td small.blk{display:block;margin:0}
+.muted{color:var(--muted);text-align:left}
+.ok{color:var(--pos);text-align:left;font-weight:600}
+td.best{box-shadow:inset 3px 0 0 var(--pos)}
+table.pick tbody tr{cursor:pointer}
+table.pick tbody tr:hover>*{background:var(--soft)}
+table.pick tr.cur>*{background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.dot.eng{background:var(--eng)}.dot.west{background:var(--west)}
+h3 .dot{margin:0}
+
+.ins{padding-left:18px;max-width:75ch;margin:0}
+.ins li{margin:6px 0}
+
+.hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}
+.hgrid label{display:flex;flex-direction:column;gap:5px;font-weight:500}
+select,input[type=number]{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:8px 10px;width:100%}
+
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.seg button,.quick button{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:14px}
+.seg button.on,.quick button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.pills{display:inline-flex;gap:3px;vertical-align:middle}
+.pill{width:22px;height:9px;border-radius:3px;border:1px solid var(--muted);overflow:hidden;display:inline-block}
+.pill i{display:block;height:100%;background:var(--brass)}
+
+.meter{display:inline-block;width:70px;height:7px;background:var(--soft);border-radius:4px;overflow:hidden;vertical-align:middle;margin-right:6px}
+.meter i{display:block;height:100%;background:var(--brass)}
+
+.slider{display:flex;flex-direction:column;gap:6px;max-width:460px}
+.slider input{width:100%;accent-color:var(--accent)}
+.quick{display:flex;gap:6px;margin:10px 0 18px}
+.bars{display:flex;flex-direction:column;gap:16px}
+.brow{padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.brow.cur{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent)}
+.bh{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 14px;margin-bottom:8px}
+.bh span{color:var(--muted);font-size:13.5px}
+.track{position:relative;height:26px;background:var(--soft);border-radius:6px;overflow:hidden}
+.track .base{position:absolute;left:0;top:0;bottom:0;background:repeating-linear-gradient(135deg,var(--line) 0 5px,transparent 5px 10px)}
+.track .bs{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent-ink);border-right:1px solid var(--surface)}
+.bs0{background:var(--accent)}.bs1{background:color-mix(in srgb,var(--accent) 72%,var(--surface))}
+.track .tgt{position:absolute;top:0;bottom:0;width:2px;background:var(--brass);margin-left:-1px}
+.combo{font-size:12.5px;color:var(--muted);margin-top:6px}
+
+.sets{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+fieldset{border:1px solid var(--line);border-radius:10px;padding:12px 14px 14px;background:var(--surface);margin:0;display:flex;flex-direction:column;gap:10px}
+legend{font:600 16px var(--serif);padding:0 6px}
+.fld{display:grid;grid-template-columns:1fr 96px;gap:10px;align-items:center;font-size:14px}
+.fld.chk{grid-template-columns:auto 1fr}
+.fld.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 16px}
+.pgrid .fld{grid-template-columns:1fr 64px}
+fieldset.wide{grid-column:1/-1}
+table.tset input[type=number]{width:80px}
+table.tset input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+table.tset th small{display:block}
+.reset{margin-top:16px;background:none;border:1px solid var(--neg);color:var(--neg);border-radius:8px;padding:8px 14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Trainingscentrum</h1>
+  <p>Wat kost het om een paard in Horse Nation vol te trainen, hoeveel klikjes en tijd gaat het kosten, en welke manier van trainen is het waard?</p>
+</header>
+<section class="picker" aria-label="Trainingsmethode"><h2>Hoe train je?</h2><div id="methods" role="radiogroup"></div></section>
+<div id="rpdbar" class="rpd"></div>
+<section id="builder" hidden></section>
+<section id="summary" aria-live="polite"></section>
+<nav id="tabs" role="tablist"></nav>
+<main id="view"></main>
+</div>
+<script>
+const PRICES_DEFAULT = {10:25,11:29,12:32,13:36,14:39,15:43,16:46,17:50,18:53,19:57,20:60};
+const PRICE_NOTE = {13:'geschat',16:'teruggerekend',18:'teruggerekend',19:'geschat'};
+const XP_KNOWN = {10:true,20:true};
+const W = (bars,fee,prize,n)=>({n,bars,fee,prize});
+const WEST_LEVELS = [W(2,0,800,'L5'),W(4,75,1500,'L4'),W(5,200,3000,'L3'),W(5,600,5000,'L2'),W(5,750,7500,'L1')];
+const DISCS = [
+  {id:'dres',name:'Dressuur',group:'eng',icon:'🎀',levels:[W(2,0,800,'BB'),W(3,50,1200,'B'),W(4,100,1750,'L1'),W(5,150,2500,'L2'),W(5,200,3500,'M1'),W(5,300,5000,'M2'),W(5,500,7000,'Z1'),W(5,750,9000,'Z2'),W(5,1000,10500,'ZZ-Licht'),W(5,1250,12000,'ZZ-Zwaar')]},
+  {id:'spr',name:'Springen',group:'eng',icon:'🏇',levels:[W(2,0,800,'B'),W(4,75,1500,'L'),W(5,200,3000,'M'),W(5,600,5000,'Z'),W(5,750,7500,'ZZ')]},
+  {id:'rei',name:'Reining',group:'west',icon:'🤠',levels:WEST_LEVELS},
+  {id:'tra',name:'Trail',group:'west',icon:'🤠',levels:WEST_LEVELS},
+  {id:'wp',name:'Western Pleasure',group:'west',icon:'🤠',levels:WEST_LEVELS},
+];
+const METHODS = [
+  {id:'gratis',name:'Zelfstandig rijden',sub:'+4% per klik, gratis'},
+  {id:'gezellig',name:'Gezellig lesje',sub:'+6% per klik'},
+  {id:'actief',name:'Actieve les',sub:'+8% per klik'},
+  {id:'meest',name:'Trainer, snelst',sub:'minste klikjes met de trainers die er zijn'},
+  {id:'zuinig',name:'Trainer, goedkoopst',sub:'minste munten met de trainers die er zijn'},
+  {id:'eigen',name:'Eigen combo',sub:'stel zelf je klikjes samen'},
+];
+const FOKBONUS=[
+  {ids:['dres','spr'],sdg:[6,6,6]},{ids:['rei','tra','wp'],sdg:[6,6,6]},
+  {ids:['dres','rei'],sdg:[5,6,6]},{ids:['dres','tra'],sdg:[6,6,4]},{ids:['dres','wp'],sdg:[6,6,3]},
+  {ids:['spr','rei','tra'],sdg:[5,4,6]},{ids:['spr','rei','wp'],sdg:[5,5,6]},{ids:['spr','tra','wp'],sdg:[6,5,6]}];
+const STEP_CODES=['z4','g6','a8','t10','t11','t12','t13','t14','t15','t16','t17','t18','t19','t20'];
+function stepInfo(code,S){
+  const p=+code.slice(1);
+  if(code[0]==='z') return {code,p,c:0,xp:S.lessonXP,label:'Rit '+p+'%',kind:'les'};
+  if(code[0]==='g') return {code,p,c:+S.priceGezellig,xp:S.lessonXP,label:'Gezellig '+p+'%',kind:'les'};
+  if(code[0]==='a') return {code,p,c:+S.priceActief,xp:S.lessonXP,label:'Actief '+p+'%',kind:'les'};
+  return {code,p,c:+S.prices[p],xp:+(S.trainerXPs[p]||0),label:p+'%',kind:'trainer',rare:!S.avail[p]};
+}
+function customFor(need,S){
+  const T=S.target, opts=[[50,T-50],[25,T-25],[0,T]];
+  let key=0; for(const [s,n] of opts){ if(need<=n){key=s;break;} }
+  return key;
+}
+function fillCustom(need,S){
+  if(need<=0) return {clicks:0,cost:0,xp:0,combo:[],topUp:0,key:customFor(0,S)};
+  const key=customFor(need,S), list=(S.custom&&S.custom[key])||[];
+  let sum=0,clicks=0,cost=0,xp=0; const combo=[];
+  for(const code of list){ if(sum>=need) break; const st=stepInfo(code,S); sum+=st.p; clicks++; cost+=st.c; xp+=st.xp; combo.push(st.p); }
+  let topUp=0;
+  if(sum<need){ const r=fillBar(need-sum,methodSteps('meest',S)); topUp=need-sum; clicks+=r.clicks; cost+=r.cost; xp+=r.xp; combo.push(...r.combo); }
+  return {clicks,cost,xp,combo,topUp,key};
+}
+const DEFAULTS = {
+  method:'meest', target:100, avgEng:2, avgWest:20, ptsEng:10, ptsWest:100, racesPerDay:4,
+  includeFees:true, prizePct:0, rest:2, activeHours:12, lessonXP:4,
+  avail:{10:false,11:false,12:false,13:false,14:false,15:false,16:false,17:true,18:false,19:false,20:true},
+  trainerXPs:{10:5,11:5,12:4,13:4,14:3,15:3,16:3,17:2,18:2,19:1,20:1},
+  priceGezellig:15, priceActief:20, prices:{...PRICES_DEFAULT},
+  promoXP:50, comboEngCoins:5000, comboEngXP:500, comboWestCoins:5000, comboWestXP:500, allCoins:15000, allXP:1250,
+  horse:{dres:0,spr:0,rei:0,tra:0,wp:0},
+  custom:{0:['t20','t20','t20','t20','t20'],25:['t20','t20','t20','t17'],50:['t17','t17','t17']}, levelDisc:'dres', barStart:50, tab:'overzicht', fbFrom:'nul', bestFrom:'nul', builderOpen:true, startHour:8, planOrder:['rei','tra','wp','spr','dres'], planFrom:'nul', planSel:'westprio', sgOpt:'laag'
+};
+
+function methodSteps(id,S){
+  const pr=S.prices, trainer=ps=>ps.map(p=>({p,c:+pr[p],xp:+(S.trainerXPs[p]||0)}));
+  let av=Object.keys(S.avail).filter(p=>S.avail[p]).map(Number); if(!av.length) av=[20];
+  switch(id){
+    case 'gratis': return {steps:[{p:4,c:0,xp:S.lessonXP}],costFirst:false};
+    case 'gezellig': return {steps:[{p:6,c:S.priceGezellig,xp:S.lessonXP}],costFirst:false};
+    case 'actief': return {steps:[{p:8,c:S.priceActief,xp:S.lessonXP}],costFirst:false};
+    case 'meest': return {steps:trainer(av),costFirst:false};
+    case 'zuinig': return {steps:trainer(av),costFirst:true};
+    case 'eigen': return {custom:true};
+  }
+}
+function fillBar(need,{steps,costFirst}){
+  if(need<=0) return {clicks:0,cost:0,xp:0,combo:[]};
+  const maxP=Math.max(...steps.map(s=>s.p)), lim=need+maxP-1;
+  const better=(a,b)=>!b||(costFirst?(a.cost<b.cost||(a.cost===b.cost&&a.clicks<b.clicks)):(a.clicks<b.clicks||(a.clicks===b.clicks&&a.cost<b.cost)));
+  const best=new Array(lim+1).fill(null); best[0]={clicks:0,cost:0,xp:0,combo:[]};
+  for(let s=1;s<=lim;s++) for(const st of steps){
+    if(st.p>s||s-st.p>=need) continue; const pv=best[s-st.p]; if(!pv) continue;
+    const c={clicks:pv.clicks+1,cost:pv.cost+st.c,xp:pv.xp+st.xp,combo:pv.combo.concat(st.p)};
+    if(better(c,best[s])) best[s]=c;
+  }
+  let a=null; for(let s=need;s<=lim;s++) if(best[s]&&better(best[s],a)) a=best[s];
+  return {...a,combo:[...a.combo].sort((x,y)=>y-x)};
+}
+function makeCalc(S,methodId){
+  const ms=methodSteps(methodId,S), memo={};
+  const fb=need=>memo[need]||(memo[need]=ms.custom?fillCustom(need,S):fillBar(need,ms));
+  const T=S.target;
+  function level(d,i){
+    const L=d.levels[i], prev=i>0?d.levels[i-1].bars:0;
+    const starts=i===0?Array(L.bars).fill(0):[...Array(prev).fill(25),...Array(L.bars-prev).fill(0)];
+    const eng=d.group==='eng', races=Math.ceil((eng?S.ptsEng:S.ptsWest)/(eng?S.avgEng:S.avgWest));
+    let cost=0,clicks=0,xp=0;
+    for(const s of starts){const f=fb(T-s);cost+=f.cost;clicks+=f.clicks;xp+=f.xp;}
+    const r=fb(T-50), again=(races-1)*L.bars;
+    cost+=again*r.cost; clicks+=again*r.clicks; xp+=again*r.xp;
+    const fees=S.includeFees?races*L.fee:0, prize=races*L.prize*S.prizePct/100;
+    return {name:L.n,bars:L.bars,starts,races,train:cost,fees,total:cost+fees,clicks,xp:xp+S.promoXP,prize,minutes:clicks*S.rest,level:L};
+  }
+  function disc(d,from=0){
+    const lv=[]; for(let i=from;i<d.levels.length-1;i++) lv.push(level(d,i));
+    const sum=k=>lv.reduce((a,x)=>a+x[k],0);
+    return {d,levels:lv,train:sum('train'),fees:sum('fees'),total:sum('total'),clicks:sum('clicks'),xp:sum('xp'),races:sum('races'),prize:sum('prize'),minutes:sum('minutes')};
+  }
+  function racePerLevel(d,i){
+    const L=d.levels[i], r=fb(T-50);
+    return {name:L.n,fee:L.fee,retrain:L.bars*r.cost,clicks:L.bars*r.clicks,cost:L.bars*r.cost+L.fee,prize:L.prize};
+  }
+  return {fb,level,disc,racePerLevel};
+}
+function combine(list,S){
+  const sum=k=>list.reduce((a,x)=>a+x[k],0);
+  const clicks=sum('clicks'), minutes=clicks*S.rest;
+  const byRaces=Math.max(0,...list.map(x=>Math.ceil(x.races/S.racesPerDay)));
+  const byTime=Math.ceil(minutes/(S.activeHours*60));
+  return {train:sum('train'),fees:sum('fees'),total:sum('total'),clicks,xp:sum('xp'),races:sum('races'),prize:sum('prize'),minutes,days:Math.max(byRaces,byTime),daysByRaces:byRaces,daysByTime:byTime};
+}
+
+const STRATS=[
+  {id:'rr',name:'Alles om de beurt',sub:'elke klik de volgende discipline'},
+  {id:'klassement',name:'Volgens het wedstrijdschema',sub:'eerst vol wat het eerst start, dan de volgende'},
+  {id:'groepen',name:'In groepen na elkaar',sub:'eerst één groep helemaal klaar, dan de volgende'},
+  {id:'slim',name:'Allround, bijna-vol eerst',sub:'train wat het snelst klaar is voor een wedstrijd'},
+  {id:'westprio',name:'Western voorrang',sub:'Engels tussendoor als Western klaarstaat'},
+  {id:'westfirst',name:'Eerst Western, dan Engels',sub:'Engels pas na de Western-fokbonus'},
+  {id:'engprio',name:'Engels voorrang',sub:'Western tussendoor als Engels klaarstaat'},
+  {id:'engfirst',name:'Eerst Engels, dan Western',sub:'Western pas na de Engelse fokbonus'},
+  {id:'een',name:'Eén discipline tegelijk',sub:'in jouw volgorde, pas verder als hij klaar is'},
+  {id:'eigen',name:'Eigen volgorde, voorrang',sub:'altijd de eerste uit jouw volgorde die iets te trainen heeft'},
+];
+const WEST_IDX={rei:0,tra:1,wp:2};
+function slotOffset(id,lvl){ let slot; if(id==='dres') slot=lvl<5?lvl*5:20+lvl; else if(id==='spr') slot=lvl*5+1; else slot=lvl*5+2+WEST_IDX[id]; return slot*5; }
+function priceOfP(p,S){ if(p===4) return 0; if(p===6) return +S.priceGezellig; if(p===8) return +S.priceActief; return +S.prices[p]; }
+function simulate(stratId,S,methodId,from){
+  const k=makeCalc(S,methodId), T=S.target, rest=Math.max(0,+S.rest);
+  const plan=need=>[...k.fb(need).combo];
+  const order=(S.planOrder||['rei','tra','wp','spr','dres']);
+  const st=DISCS.map(d=>{
+    const lvl=from?from[d.id]:0, top=d.levels.length-1;
+    const o={d,lvl,top,pts:0,entered:null,done:lvl>=top,doneAt:lvl>=top?0:null,bars:[],segs:[],segStart:0,rank:order.indexOf(d.id)};
+    if(!o.done) setBars(o,true); return o;
+  });
+  function setBars(o,initial){
+    const L=o.d.levels[o.lvl], prev=o.lvl>0?o.d.levels[o.lvl-1].bars:0;
+    const starts=o.lvl===0?Array(L.bars).fill(0):[...Array(prev).fill(25),...Array(L.bars-prev).fill(0)];
+    o.bars=starts.map(v=>({v,plan:plan(T-v)}));
+  }
+  const need=o=>o.d.group==='eng'?S.ptsEng:S.ptsWest, avg=o=>o.d.group==='eng'?S.avgEng:S.avgWest;
+  const left=o=>o.bars.reduce((a,b)=>a+b.plan.length,0);
+  const t0=Math.round(S.startHour*60), activeLen=Math.round(S.activeHours*60);
+  const active=t=>{const m=((t-t0)%1440+1440)%1440; return m<activeLen;};
+  const count={}; const clickTimes=[]; let t=t0, restUntil=t0, clicks=0, cost=0, fees=0, races=0, rr=0;
+  const LIMIT=t0+120*1440; let cur=null;
+  st.forEach(o=>{o.segStart=t0;});
+  const nextRace=(o,t)=>{const off=slotOffset(o.d.id,o.lvl); let rt=(Math.floor((t-off)/180)+1)*180+off; while((count[o.d.id+':'+Math.floor(rt/1440)]||0)>=S.racesPerDay) rt+=180; return rt;};
+  function pick(c){
+    if(!c.length) return null;
+    const slim=list=>list.slice().sort((a,b)=>left(a)-left(b)||a.rank-b.rank)[0];
+    const W=c.filter(o=>o.d.group==='west'), E=c.filter(o=>o.d.group==='eng');
+    const westDone=st.filter(o=>o.d.group==='west').every(o=>o.done), engDone=st.filter(o=>o.d.group==='eng').every(o=>o.done);
+    switch(stratId){
+      case 'rr': { const ids=DISCS.map(d=>d.id); for(let i=1;i<=ids.length;i++){const id=ids[(rr+i)%ids.length]; const o=c.find(x=>x.d.id===id); if(o){rr=ids.indexOf(id);return o;}} return null; }
+      case 'slim': return slim(c);
+      case 'groepen': {
+        const gOf=o=>o.d.group==='west'?'west':o.d.id; const gOrder=[]; for(const id of order){const d=DISCS.find(z=>z.id===id); const g=d.group==='west'?'west':id; if(!gOrder.includes(g)) gOrder.push(g);}
+        const g=gOrder.find(g=>st.some(o=>gOf(o)===g&&!o.done)); const cg=c.filter(o=>gOf(o)===g); if(!cg.length) return null;
+        if(cur && cg.includes(cur)) return cur; cur=cg.slice().sort((a,b)=>nextRace(a,t)-nextRace(b,t)||a.rank-b.rank)[0]; return cur; }
+      case 'klassement': { if(cur && c.includes(cur)) return cur; cur=c.slice().sort((a,b)=>nextRace(a,t)-nextRace(b,t)||a.rank-b.rank)[0]; return cur; }
+      case 'westprio': return W.length?slim(W):slim(E);
+      case 'engprio': return E.length?slim(E):slim(W);
+      case 'westfirst': return westDone?slim(E):(W.length?slim(W):null);
+      case 'engfirst': return engDone?slim(W):(E.length?slim(E):null);
+      case 'een': { const cur=st.filter(o=>!o.done).sort((a,b)=>a.rank-b.rank)[0]; return c.includes(cur)?cur:null; }
+      case 'eigen': return c.slice().sort((a,b)=>a.rank-b.rank)[0];
+    }
+  }
+  while(t<LIMIT && st.some(o=>!o.done)){
+    for(const o of st){ if(o.entered===t){
+      o.entered=null; races++; o.pts+=avg(o);
+      if(o.pts>=need(o)){ o.segs.push({n:o.d.levels[o.lvl].n,from:o.segStart,to:t}); o.segStart=t; o.lvl++; o.pts=0;
+        if(o.lvl>=o.top){o.done=true;o.doneAt=t;o.bars=[];} else setBars(o); }
+      else o.bars=o.bars.map(()=>({v:50,plan:plan(T-50)}));
+    }}
+    if(active(t)){
+      for(const o of st){ if(o.done||o.entered!==null||left(o)>0) continue;
+        const b=nextRace(o,t);
+        o.entered=b; const key=o.d.id+':'+Math.floor(b/1440); count[key]=(count[key]||0)+1; if(S.includeFees) fees+=o.d.levels[o.lvl].fee; }
+      if(t>=restUntil){
+        const c=st.filter(o=>!o.done&&o.entered===null&&left(o)>0);
+        const o=pick(c);
+        if(o){ const bar=o.bars.find(b=>b.plan.length); const p=bar.plan.shift(); bar.v=Math.min(100,bar.v+p); cost+=priceOfP(p,S); clicks++; clickTimes.push(t); restUntil=t+rest; }
+      }
+    }
+    t++;
+  }
+  const at=g=>{const l=st.filter(g); return l.every(o=>o.done)?Math.max(...l.map(o=>o.doneAt)):null;};
+  const fb=FOKBONUS.map(f=>{const l=st.filter(o=>f.ids.includes(o.d.id)); return l.every(o=>o.done)?Math.max(...l.map(o=>o.doneAt)):null;}).filter(x=>x!==null);
+  return {t0,west:at(o=>o.d.group==='west'),eng:at(o=>o.d.group==='eng'),all:at(()=>true),firstFok:fb.length?Math.min(...fb):null,
+    clicks,clickTimes,cost,fees,races,st:st.map(o=>({d:o.d,segs:o.segs,doneAt:o.doneAt,startLvl:from?from[o.d.id]:0})),capped:st.some(o=>!o.done)};
+}
+
+function groupCombo(c){const g=[];for(const p of c){const l=g.at(-1);if(l&&l.p===p)l.n++;else g.push({p,n:1});}return g.map(x=>(x.n>1?x.n+' × ':'')+x.p+'%').join(' + ');}
+const KEY='hn-trainingscentrum-v1';
+let S=JSON.parse(JSON.stringify(DEFAULTS));
+try{const raw=localStorage.getItem(KEY); if(raw){const o=JSON.parse(raw); S={...S,...o,prices:{...S.prices,...(o.prices||{})},horse:{...S.horse,...(o.horse||{})},planOrder:(o.planOrder&&o.planOrder.length===5)?o.planOrder:S.planOrder,custom:{...S.custom,...(o.custom||{})},avail:{...S.avail,...(o.avail||{})},trainerXPs:{...S.trainerXPs,...(o.trainerXPs||{})}}; if(!METHODS.some(m=>m.id===S.method)) S.method='meest';}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+const nf=n=>Math.round(n).toLocaleString('nl-NL');
+const coin=n=>'Ħ\u202f'+nf(n);
+const signed=n=>(n<0?'−':'+')+' '+coin(Math.abs(n));
+function tm(min){min=Math.round(min); if(min<60) return min+' min'; const h=Math.floor(min/60),m=min%60; if(h<24) return h+' u'+(m?' '+m+' min':''); const d=Math.floor(h/24),hh=h%24; return d+' d'+(hh?' '+hh+' u':'');}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mName=id=>METHODS.find(m=>m.id===id).name;
+const $=s=>document.querySelector(s);
+
+function rewards(kind){ // kind: eng | west | all
+  if(kind==='eng') return {coins:S.comboEngCoins,xp:S.comboEngXP};
+  if(kind==='west') return {coins:S.comboWestCoins,xp:S.comboWestXP};
+  return {coins:S.comboEngCoins+S.comboWestCoins+S.allCoins,xp:S.comboEngXP+S.comboWestXP+S.allXP};
+}
+function fullFor(methodId,from){
+  const k=makeCalc(S,methodId);
+  const ds=DISCS.map(d=>k.disc(d,from?from[d.id]:0));
+  const eng=combine(ds.filter(x=>x.d.group==='eng'),S), west=combine(ds.filter(x=>x.d.group==='west'),S), all=combine(ds,S);
+  return {k,ds,eng,west,all};
+}
+
+function renderRpd(){
+  $('#rpdbar').innerHTML=`<span>Wedstrijden per discipline per dag die je haalt</span><div class="seg">${[4,3,2,1].map(n=>`<button type="button" data-rpd="${n}" class="${S.racesPerDay===n?'on':''}" aria-pressed="${S.racesPerDay===n}">${n} van 4</button>`).join('')}</div><small>Geldt voor alle dagen en tijden in de app.</small>`;
+}
+function renderMethods(){
+  $('#methods').innerHTML=METHODS.map(m=>`<button type="button" role="radio" aria-checked="${S.method===m.id}" class="mbtn${S.method===m.id?' on':''}" data-method="${m.id}"><span class="mn">${m.name}</span><span class="ms">${m.sub}</span></button>`).join('');
+}
+function renderSummary(){
+  const r=fullFor(S.method).all, rw=rewards('all');
+  const net=rw.coins+r.prize-r.total;
+  $('#summary').innerHTML=`
+  <p class="lead">Een paard volledig trainen in alle vijf disciplines met <b>${mName(S.method).toLowerCase()}</b>:</p>
+  <div class="big">
+    <div><span class="num">${coin(r.total)}</span><span class="lab">${S.includeFees?'training en inschrijfgeld':'alleen training'}</span></div>
+    <div><span class="num">${nf(r.clicks)}</span><span class="lab">trainingsklikjes</span></div>
+    <div><span class="num">${tm(r.minutes)}</span><span class="lab">rusttijd bij elkaar</span></div>
+    <div><span class="num">${r.days} dagen</span><span class="lab">minimaal, ${r.races} wedstrijden</span></div>
+  </div>
+  <p class="net">Beloningen samen ${coin(rw.coins)} en ${nf(rw.xp+r.xp)} XP${S.prizePct?`, plus ongeveer ${coin(r.prize)} prijzengeld`:''}. Netto: <b class="${net<0?'neg':'pos'}">${signed(net)}</b>${S.prizePct?'':' zonder prijzengeld'}.</p>`;
+}
+
+function rowTot(label,x,rw,cls=''){
+  const net=rw.coins+x.prize-x.total;
+  return `<tr class="${cls}"><th scope="row">${label}</th><td>${coin(x.train)}</td><td>${coin(x.fees)}</td><td><b>${coin(x.total)}</b></td><td>${nf(x.clicks)}</td><td>${tm(x.minutes)}</td><td>${x.races}</td><td>${x.days}</td><td>${coin(rw.coins)}<small class="blk">${nf(rw.xp)} XP</small></td><td class="${net<0?'neg':'pos'}">${signed(net)}</td></tr>`;
+}
+const HEAD=`<thead><tr><th></th><th>Training</th><th>Inschrijfgeld</th><th>Totaal</th><th>Klikjes</th><th>Rusttijd</th><th>Wedstr.</th><th>Dagen</th><th>Beloning</th><th>Netto</th></tr></thead>`;
+
+function insights(){
+  const cur=fullFor(S.method).all, out=[];
+  const res=METHODS.map(m=>({m,r:fullFor(m.id).all}));
+  const cheapPaid=res.filter(x=>x.m.id!=='gratis').sort((a,b)=>a.r.total-b.r.total)[0];
+  const free=res.find(x=>x.m.id==='gratis');
+  out.push(`Inschrijfgeld is een grote post: ${coin(cur.fees)} over ${cur.races} wedstrijden. Dat stond niet in de oorspronkelijke rekensom.`);
+  if(S.method!=='gratis') out.push(`Zelfstandig rijden scheelt ${coin(cur.train)} aan training, maar kost ${nf(free.r.clicks-cur.clicks)} klikjes extra en ${tm(free.r.minutes-cur.minutes)} meer rusttijd. Dan kom je op minimaal ${free.r.days} dagen in plaats van ${cur.days}.`);
+  if(cheapPaid.m.id!==S.method) out.push(`De goedkoopste betaalde manier is ${cheapPaid.m.name.toLowerCase()}: ${coin(cheapPaid.r.total)}, met ${nf(cheapPaid.r.clicks)} klikjes.`);
+  const k=makeCalc(S,S.method), f=k.fb(S.target-50);
+  out.push(`Na elke wedstrijd train je een balkje van 50% naar ${S.target}% met ${f.combo.length} klik${f.combo.length===1?'':'jes'} (${groupCombo(f.combo)}) voor ${coin(f.cost)}.`);
+  return out.map(t=>`<li>${t}</li>`).join('');
+}
+
+function vOverzicht(){
+  const {ds,eng,west,all}=fullFor(S.method);
+  return `<h2>Tot fokbonus en volledige training</h2>
+  <div class="tw"><table>${HEAD}<tbody>
+  ${rowTot('Fokbonus Engels <small>Dressuur en Springen</small>',eng,rewards('eng'))}
+  ${rowTot('Fokbonus Western <small>alle drie de disciplines</small>',west,rewards('west'))}
+  ${rowTot('Volledige training',all,rewards('all'),'sum')}
+  </tbody></table></div>
+  <h2>Wat valt op</h2><ul class="ins">${insights()}</ul>
+  <h2>Per discipline</h2>
+  <div class="tw"><table><thead><tr><th></th><th>Niveaus</th><th>Training</th><th>Inschrijfgeld</th><th>Totaal</th><th>Klikjes</th><th>Wedstrijden</th><th>Min. dagen</th></tr></thead><tbody>
+  ${ds.map(x=>`<tr><th scope="row"><span class="dot ${x.d.group}"></span>${x.d.icon} ${x.d.name}</th><td>${x.d.levels[0].n} tot ${x.d.levels.at(-1).n}</td><td>${coin(x.train)}</td><td>${coin(x.fees)}</td><td><b>${coin(x.total)}</b></td><td>${nf(x.clicks)}</td><td>${x.races}</td><td>${Math.ceil(x.races/S.racesPerDay)}</td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="note">Dagen per discipline tellen alleen de limiet van ${S.racesPerDay} wedstrijden per dag. Train je alles tegelijk op één paard, dan deelt het paard de rusttijd over alle disciplines.</p>`;
+}
+
+function vPaard(){
+  const r=fullFor(S.method,S.horse);
+  const done=x=>x.levels.length===0;
+  const engDone=r.ds.filter(x=>x.d.group==='eng').every(done), westDone=r.ds.filter(x=>x.d.group==='west').every(done);
+  return `<h2>Wat kost het nog voor jouw paard?</h2>
+  <p class="intro">Kies per discipline het niveau waar je paard nu op zit. De berekening gaat uit van net gepromoveerd, dus de balkjes staan op de beginstand van dat niveau.</p>
+  <div class="hgrid">${DISCS.map(d=>`<label><span><span class="dot ${d.group}"></span>${d.icon} ${d.name}</span><select data-horse="${d.id}">${d.levels.map((l,i)=>`<option value="${i}"${S.horse[d.id]===i?' selected':''}>${l.n}${i===d.levels.length-1?' (top)':''}</option>`).join('')}</select></label>`).join('')}</div>
+  <div class="tw"><table>${HEAD}<tbody>
+  ${engDone?`<tr><th scope="row">Fokbonus Engels</th><td colspan="9" class="ok">Bereikt</td></tr>`:rowTot('Nog tot fokbonus Engels',r.eng,rewards('eng'))}
+  ${westDone?`<tr><th scope="row">Fokbonus Western</th><td colspan="9" class="ok">Bereikt</td></tr>`:rowTot('Nog tot fokbonus Western',r.west,rewards('west'))}
+  ${engDone&&westDone?`<tr class="sum"><th scope="row">Volledig getraind</th><td colspan="9" class="ok">Klaar</td></tr>`:rowTot('Nog tot volledige training',r.all,{coins:(engDone?0:S.comboEngCoins)+(westDone?0:S.comboWestCoins)+S.allCoins,xp:(engDone?0:S.comboEngXP)+(westDone?0:S.comboWestXP)+S.allXP},'sum')}
+  </tbody></table></div>
+  <div class="tw"><table><thead><tr><th></th><th>Nu</th><th>Nog te gaan</th><th>Totaal</th><th>Klikjes</th><th>Wedstrijden</th></tr></thead><tbody>
+  ${r.ds.map(x=>`<tr><th scope="row"><span class="dot ${x.d.group}"></span>${x.d.name}</th><td>${x.d.levels[S.horse[x.d.id]].n}</td><td>${done(x)?'klaar':x.levels.length+' niveau'+(x.levels.length===1?'':'s')}</td><td>${coin(x.total)}</td><td>${nf(x.clicks)}</td><td>${x.races}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+function barPills(starts){return `<span class="pills">${starts.map(s=>`<span class="pill" title="${s}% na promoveren"><i style="width:${s}%"></i></span>`).join('')}</span>`;}
+function vNiveaus(){
+  const k=makeCalc(S,S.method), d=DISCS.find(x=>x.id===S.levelDisc), r=k.disc(d);
+  return `<h2>Niveau voor niveau</h2>
+  <div class="seg">${DISCS.map(x=>`<button type="button" data-ldisc="${x.id}" class="${x.id===S.levelDisc?'on':''}" aria-pressed="${x.id===S.levelDisc}">${x.icon} ${x.name}</button>`).join('')}</div>
+  <p class="intro">Per niveau vul je de balkjes eerst vanaf de stand na promoveren. Na elke wedstrijd zonder promotie zakken ze naar 50% en train je ze weer naar ${S.target}%. Met gemiddeld ${d.group==='eng'?S.avgEng:S.avgWest} punten per wedstrijd en ${d.group==='eng'?S.ptsEng:S.ptsWest} punten nodig zijn dat ${r.levels[0]?.races} wedstrijden per niveau.</p>
+  <div class="tw"><table><thead><tr><th>Niveau</th><th>Balkjes na promoveren</th><th>Wedstr.</th><th>Training</th><th>Inschrijfgeld</th><th>Totaal</th><th>Klikjes</th><th>Rusttijd</th></tr></thead><tbody>
+  ${r.levels.map(l=>`<tr><th scope="row">${l.name}</th><td>${barPills(l.starts)} <small>${l.starts.filter(s=>s===25).length?l.starts.filter(s=>s===25).length+'×25%':''}${l.starts.filter(s=>s===25).length&&l.starts.filter(s=>s===0).length?' + ':''}${l.starts.filter(s=>s===0).length?l.starts.filter(s=>s===0).length+' leeg':''}</small></td><td>${l.races}</td><td>${coin(l.train)}</td><td>${coin(l.fees)}</td><td><b>${coin(l.total)}</b></td><td>${l.clicks}</td><td>${tm(l.minutes)}</td></tr>`).join('')}
+  <tr><th scope="row">${d.levels.at(-1).n}</th><td colspan="7" class="muted">Hoogste niveau, hier hoef je niet meer voor te trainen.</td></tr>
+  <tr class="sum"><th scope="row">Samen</th><td></td><td>${r.races}</td><td>${coin(r.train)}</td><td>${coin(r.fees)}</td><td><b>${coin(r.total)}</b></td><td>${nf(r.clicks)}</td><td>${tm(r.minutes)}</td></tr>
+  </tbody></table></div>`;
+}
+
+function vMethoden(){
+  const res=METHODS.map(m=>({m,r:fullFor(m.id).all}));
+  const minT=Math.min(...res.map(x=>x.r.total)), minC=Math.min(...res.map(x=>x.r.clicks));
+  const per=[['Zelfstandig rijden',4,0],['Gezellig lesje',6,S.priceGezellig],['Actieve les',8,S.priceActief],...Object.entries(S.prices).map(([p,c])=>['Trainer '+p+'%',+p,+c,S.avail[p]?'vaak':'zelden'])];
+  return `<h2>Trainingsmethoden naast elkaar</h2>
+  <p class="intro">Alles voor een volledige training, dus alle vijf disciplines tot het hoogste niveau. Klik een rij aan om die methode te kiezen.</p>
+  <div class="tw"><table class="pick"><thead><tr><th>Methode</th><th>Training</th><th>Totaal</th><th>Klikjes</th><th>Rusttijd</th><th>Trainings-XP</th><th>Min. dagen</th></tr></thead><tbody>
+  ${res.map(({m,r})=>`<tr data-method="${m.id}" tabindex="0" class="${m.id===S.method?'cur':''}"><th scope="row">${m.name}<small>${m.sub}</small></th><td>${coin(r.train)}</td><td class="${r.total===minT?'best':''}"><b>${coin(r.total)}</b></td><td class="${r.clicks===minC?'best':''}">${nf(r.clicks)}</td><td>${tm(r.minutes)}</td><td>${nf(r.xp-S.promoXP*(9+4*4))}</td><td>${r.days}</td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="note">Trainings-XP is de XP die jij als eigenaar per klik krijgt. Bij trainers loopt dat van 5 XP bij 10% naar 1 XP bij 20%. De tussenliggende waarden zijn geschat en kun je aanpassen onder Aannames.</p>
+  <h2>Prijs per procent</h2>
+  <div class="tw"><table class="narrow"><thead><tr><th>Optie</th><th>Per klik</th><th>Kosten</th><th>Per procent</th><th>Aangeboden</th></tr></thead><tbody>
+  ${per.map(([n,p,c,av])=>`<tr class="${av==='zelden'?'dim':''}"><th scope="row">${n}${S.prices[p]!==undefined&&n.startsWith('Trainer')&&PRICE_NOTE[p]?` <small>${PRICE_NOTE[p]}</small>`:''}</th><td>+${p}%</td><td>${coin(c)}</td><td>${(c/p).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td>${av||'altijd'}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+function vWedstrijden(){
+  const k=makeCalc(S,S.method);
+  const seen=new Set(), groups=DISCS.filter(d=>d.group==='eng'||(!seen.has('w')&&seen.add('w')));
+  return `<h2>Wat kost één wedstrijd?</h2>
+  <p class="intro">Na een wedstrijd staan alle balkjes op 50%. Voor de volgende wedstrijd train je ze terug naar ${S.target}% en betaal je inschrijfgeld. De kolom "Quitte bij" laat zien welk deel van de hoofdprijs je gemiddeld moet winnen om die kosten terug te verdienen.</p>
+  ${groups.map(d=>`<h3><span class="dot ${d.group}"></span>${d.group==='west'?'🤠 Western (per discipline)':d.icon+' '+d.name}</h3>
+  <div class="tw"><table><thead><tr><th>Niveau</th><th>Inschrijfgeld</th><th>Hertrainen</th><th>Kosten per wedstrijd</th><th>Hoofdprijs</th><th>Quitte bij</th></tr></thead><tbody>
+  ${d.levels.map((l,i)=>{const r=k.racePerLevel(d,i),q=r.cost/r.prize;return `<tr><th scope="row">${r.name}</th><td>${r.fee?coin(r.fee):'gratis'}</td><td>${coin(r.retrain)} <small>${r.clicks} klikjes</small></td><td><b>${coin(r.cost)}</b></td><td>${coin(r.prize)}</td><td><span class="meter"><i style="width:${Math.min(100,q*100)}%"></i></span> ${Math.round(q*100)}%</td></tr>`}).join('')}
+  </tbody></table></div>`).join('')}
+  <p class="note">Hoe het prijzengeld over de plaatsen verdeeld wordt, is nog niet bekend. De hoofdprijs is het bedrag voor de eerste plaats.</p>`;
+}
+
+function vBalkjes(){
+  return `<h2>Eén balkje vullen</h2>
+  <p class="intro">Kies waar een balkje begint. Je ziet per methode welke klikjes het snelst of goedkoopst naar ${S.target}% gaan.</p>
+  <label class="slider">Balkje begint op <b id="barVal">${S.barStart}%</b><input type="range" min="0" max="${S.target}" step="1" value="${S.barStart}" data-set="barStart"></label>
+  <div class="quick">${[0,25,50].map(v=>`<button type="button" data-bar="${v}" class="${S.barStart===v?'on':''}">${v===0?'Leeg':v+'%'}</button>`).join('')}</div>
+  <div class="bars" id="barsOut">${barsHTML()}</div>`;
+}
+function barsHTML(){
+  const need=Math.max(0,S.target-S.barStart);
+  return METHODS.map(m=>{const f=makeCalc(S,m.id).fb(need); let x=S.barStart;
+    return `<div class="brow${m.id===S.method?' cur':''}"><div class="bh"><b>${m.name}</b><span>${f.clicks} klik${f.clicks===1?'':'jes'}, ${coin(f.cost)}, ${tm(f.clicks*S.rest)} rust</span></div>
+    <div class="track"><span class="base" style="width:${S.barStart}%"></span>${f.combo.map((p,i)=>{const w=Math.max(0,Math.min(p,100-x));const el=`<span class="bs bs${i%2}" style="left:${x}%;width:${w}%" title="+${p}%">${p>=6&&w>=6?p:''}</span>`;x+=p;return el;}).join('')}<span class="tgt" style="left:${S.target}%"></span></div>
+    <div class="combo">${f.combo.length?groupCombo(f.combo):'Al vol'}${f.topUp?` <span class="warn">(aangevuld, je combo kwam ${f.topUp}% tekort)</span>`:''}</div></div>`;}).join('');
+}
+
+function num(key,label,opts={}){return `<label class="fld"><span>${label}${opts.hint?`<small>${opts.hint}</small>`:''}</span><input type="number" inputmode="decimal" data-set="${key}" value="${S[key]}" min="${opts.min??0}" max="${opts.max??''}" step="${opts.step??1}"></label>`;}
+function vAannames(){
+  return `<h2>Aannames aanpassen</h2>
+  <p class="intro">Alle berekeningen gebruiken deze waarden. Pas ze aan als je meer weet; ze worden in deze browser bewaard.</p>
+  <div class="sets">
+  <fieldset><legend>Wedstrijden</legend>
+    ${num('target','Balkjes trainen tot (%)',{min:80,max:100,hint:'inschrijven kan vanaf 80%'})}
+    ${num('avgEng','Gemiddelde winstpunten Dressuur en Springen',{min:1,max:3,step:.5})}
+    ${num('ptsEng','Punten nodig om te promoveren',{min:1})}
+    ${num('avgWest','Gemiddelde winstpunten Western',{min:10,max:30,step:5})}
+    ${num('ptsWest','Punten nodig om te promoveren (Western)',{min:1})}
+    <label class="fld chk"><input type="checkbox" data-set="includeFees" ${S.includeFees?'checked':''}><span>Inschrijfgeld meetellen</span></label>
+    ${num('prizePct','Gemiddeld prijzengeld (% van hoofdprijs)',{max:100,hint:'0 = niet meetellen'})}
+  </fieldset>
+  <fieldset><legend>Tijd</legend>
+    ${num('rest','Rusttijd per trainingsklik (min)',{min:0,step:.5})}
+    ${num('startHour','Je begint met spelen om (uur)',{min:0,max:23})}
+    ${num('activeHours','Uren per dag dat je speelt',{min:1,max:24})}
+  </fieldset>
+  <fieldset><legend>Beloningen</legend>
+    ${num('promoXP','XP per promotie',{hint:'schatting, tussen 50 en 75'})}
+    ${num('comboEngCoins','Fokbonus Engels, munten')}${num('comboEngXP','Fokbonus Engels, XP')}
+    ${num('comboWestCoins','Fokbonus Western, munten')}${num('comboWestXP','Fokbonus Western, XP')}
+    ${num('allCoins','Allround, munten')}${num('allXP','Allround, XP')}
+  </fieldset>
+  <fieldset><legend>Prijzen</legend>
+    ${num('priceGezellig','Gezellig lesje')}${num('priceActief','Actieve les')}
+    ${num('lessonXP','XP per les of rit')}
+  </fieldset>
+  <fieldset class="wide"><legend>Trainers</legend>
+    <p class="note" style="margin:0">Vink aan welke trainers je normaal aangeboden krijgt. De trainer-methoden gebruiken alleen die. Nieuwe trainers beginnen op 10% en groeien naar 20%, dus de lage percentages zie je alleen af en toe.</p>
+    <div class="tw"><table class="narrow tset"><thead><tr><th>Trainer</th><th>Aangeboden</th><th>Prijs</th><th>XP voor jou</th></tr></thead><tbody>
+    ${Object.keys(S.prices).map(p=>`<tr><th scope="row">${p}%${PRICE_NOTE[p]?`<small>prijs ${PRICE_NOTE[p]}</small>`:''}${!XP_KNOWN[p]?`<small>XP geschat</small>`:''}</th>
+      <td><input type="checkbox" data-avail="${p}" ${S.avail[p]?'checked':''} aria-label="Trainer ${p}% aangeboden"></td>
+      <td><input type="number" data-price="${p}" value="${S.prices[p]}" min="0" aria-label="Prijs trainer ${p}%"></td>
+      <td><input type="number" data-txp="${p}" value="${S.trainerXPs[p]}" min="0" step="1" aria-label="XP trainer ${p}%"></td></tr>`).join('')}
+    </tbody></table></div>
+  </fieldset>
+  </div>
+  <button type="button" class="reset" data-reset>Alles terugzetten</button>
+  <h2>Hoe het rekent</h2>
+  <ul class="ins">
+    <li>Een paard begint in elke discipline op het laagste niveau met 2 lege balkjes.</li>
+    <li>Bij promoveren gaan bestaande balkjes naar 25% en starten nieuwe balkjes op 0%.</li>
+    <li>Na een wedstrijd zonder promotie zakken alle balkjes van dat niveau naar 50%.</li>
+    <li>Per niveau rijd je zoveel wedstrijden als nodig is om de promotiepunten te halen met je gemiddelde winstpunten.</li>
+    <li>Elke trainingsklik geeft het paard ${S.rest} minuten rust, of het nu een les, een rit of een trainer is.</li>
+    <li>Bij de trainer-methoden zoekt de app met de trainers die jij als aangeboden hebt aangevinkt de combinatie die het balkje minstens tot je doel brengt: met de minste klikjes, of bij "goedkoopst" met de minste munten.</li>
+    <li>De beloning voor volledige training telt beide fokbonussen en de allroundbeloning mee.</li>
+  </ul>
+  <h2>Nog onbekend</h2>
+  <ul class="ins"><li>XP per trainerklik tussen 10% en 20%, en de prijzen voor trainer 13% en 19%.</li><li>Hoe het prijzengeld over de plaatsen verdeeld is.</li><li>Precieze XP per promotie.</li><li>Of je beide fokbonussen krijgt naast de allroundbeloning.</li></ul>`;
+}
+
+
+function renderBuilder(){
+  const el=$('#builder'); if(S.method!=='eigen'){el.hidden=true;el.innerHTML='';return;}
+  el.hidden=false; const T=S.target;
+  const rows=[[0,'Leeg balkje',T],[25,'Balkje op 25%',T-25],[50,'Balkje op 50%',T-50]];
+  if(!S.builderOpen){
+    el.innerHTML=`<div class="bclosed"><div class="bctop"><h2>Jouw combo</h2><button type="button" class="tgl" data-builder="open" aria-expanded="false">Aanpassen</button></div>
+    <dl class="csum">${rows.map(([k,label,need])=>{const list=S.custom[k]||[],info=list.map(c=>stepInfo(c,S)),sum=info.reduce((a,x)=>a+x.p,0);
+      return `<div><dt>${label}</dt><dd>${list.length?groupCombo(info.map(x=>x.p)):'geen klikjes'}${sum<need?` <span class="warn">(${need-sum}% tekort)</span>`:''}</dd></div>`;}).join('')}</dl></div>`;
+    return;
+  }
+  el.innerHTML=`<div class="bctop"><h2>Jouw combo</h2><button type="button" class="tgl" data-builder="close" aria-expanded="true">Inklappen</button></div>
+  <p class="intro">Stel per beginstand samen welke klikjes je gebruikt. Klik op een knop om een klik toe te voegen en op een blokje om hem weg te halen. De app gebruikt de klikjes op volgorde tot het balkje op ${T}% staat.</p>
+  ${rows.map(([k,label,need])=>{
+    const list=S.custom[k]||[], info=list.map(c=>stepInfo(c,S)), sum=info.reduce((a,x)=>a+x.p,0), cost=info.reduce((a,x)=>a+x.c,0);
+    const short=need-sum, over=sum-need;
+    const status=short>0?`<span class="warn">${short}% tekort, de app vult dit aan met een trainer</span>`:over>0?`<span class="muted2">${over}% over, dat gaat verloren</span>`:`<span class="okt">precies ${T}%</span>`;
+    let x=k;
+    return `<div class="crow">
+      <div class="bh"><b>${label} naar ${T}%</b><span>${sum}% bij elkaar, ${list.length} klik${list.length===1?'':'jes'}, ${coin(cost)}</span></div>
+      <div class="track"><span class="base" style="width:${k}%"></span>${info.map((st,i)=>{const w=Math.max(0,Math.min(st.p,100-x));const h=`<span class="bs bs${i%2}${st.kind==='les'?' les':''}" style="left:${x}%;width:${w}%">${w>=6?st.p:''}</span>`;x+=st.p;return h;}).join('')}<span class="tgt" style="left:${T}%"></span></div>
+      <div class="chips">${info.map((st,i)=>`<button type="button" class="chip${st.kind==='les'?' les':''}" data-rm="${k}:${i}" aria-label="${st.label} weghalen">${st.label} <span aria-hidden="true">×</span></button>`).join('')||'<span class="muted2">Nog geen klikjes</span>'}${list.length?`<button type="button" class="clr" data-clr="${k}">Leegmaken</button>`:''}</div>
+      <div class="status">${status}</div>
+      <div class="adds">${STEP_CODES.map(c=>{const st=stepInfo(c,S);return `<button type="button" class="${st.kind}${st.rare?' rare':''}" data-add="${k}:${c}" ${st.rare?'title="Wordt zelden aangeboden"':''}>+ ${st.label}</button>`}).join('')}</div>
+    </div>`;}).join('')}`;
+}
+
+function sdgDots(sdg){return `<span class="sdg">${['S','D','G'].map((l,i)=>`<span class="sl"><b>${l}</b>${Array.from({length:6},(_,j)=>`<i class="${j<sdg[i]?'f':''}"></i>`).join('')}</span>`).join('')}</span>`;}
+function vFokbonus(){
+  const from=S.fbFrom==='paard'?S.horse:null, r=fullFor(S.method,from);
+  const byId=Object.fromEntries(r.ds.map(x=>[x.d.id,x]));
+  const rows=FOKBONUS.map(f=>{const sel=f.ids.map(id=>byId[id]); const tot=combine(sel,S); const done=sel.every(x=>x.levels.length===0); const dots=f.sdg.reduce((a,b)=>a+b,0);
+    return {f,sel,tot,done,dots,name:f.ids.map(id=>DISCS.find(d=>d.id===id).name).join(' + ')};});
+  rows.forEach(a=>{a.better=rows.find(b=>b!==a&&!b.done&&b.tot.total<=a.tot.total&&b.f.sdg.every((v,i)=>v>=a.f.sdg[i])&&(b.tot.total<a.tot.total||b.f.sdg.some((v,i)=>v>a.f.sdg[i])));});
+  const open=rows.filter(x=>!x.done), full=open.filter(x=>x.dots===18).sort((a,b)=>a.tot.total-b.tot.total), cheap=[...open].sort((a,b)=>a.tot.total-b.tot.total)[0];
+  const minT=cheap?cheap.tot.total:null;
+  const ins=[];
+  if(rows.some(x=>x.done)) ins.push(`Je paard heeft de fokbonus al met ${rows.filter(x=>x.done).map(x=>x.name).join(' en ')}.`);
+  if(full[0]) ins.push(`De goedkoopste weg naar alle 18 bolletjes is ${full[0].name}: ${coin(full[0].tot.total)}${full[1]?`, tegenover ${coin(full[1].tot.total)} voor ${full[1].name}`:''}.`);
+  if(cheap&&cheap.dots<18) ins.push(`De goedkoopste fokbonus overall is ${cheap.name} voor ${coin(cheap.tot.total)}, maar met ${cheap.dots} van de 18 bolletjes.`);
+  const dom=rows.filter(x=>x.better&&!x.done);
+  if(dom.length) ins.push(`${dom.length} van de ${rows.length} combinaties kosten evenveel of meer dan een andere combinatie die minstens even veel bolletjes geeft. Die staan hieronder grijs.`);
+  return `<h2>Fokbonus</h2>
+  <p class="intro">Je krijgt de fokbonus als je paard in een van deze combinaties van disciplines het hoogste niveau haalt. Per letter tellen maximaal 6 bolletjes mee.</p>
+  <div class="seg"><button type="button" data-fbfrom="nul" class="${S.fbFrom==='nul'?'on':''}" aria-pressed="${S.fbFrom==='nul'}">Vanaf een nieuw paard</button><button type="button" data-fbfrom="paard" class="${S.fbFrom==='paard'?'on':''}" aria-pressed="${S.fbFrom==='paard'}">Vanaf mijn paard</button></div>
+  ${S.fbFrom==='paard'?`<p class="note">Gebaseerd op de niveaus die je onder Mijn paard hebt gekozen.</p>`:''}
+  <ul class="ins">${ins.map(t=>`<li>${t}</li>`).join('')}</ul>
+  <div class="tw"><table class="fb"><thead><tr><th>Combinatie</th><th>Bolletjes</th><th>Totaal</th><th>Klikjes</th><th>Rusttijd</th><th>Wedstr.</th><th>Min. dagen</th><th>Per bolletje</th></tr></thead><tbody>
+  ${rows.map(x=>`<tr class="${x.better?'dim':''}"><th scope="row">${x.f.ids.map(id=>{const d=DISCS.find(z=>z.id===id);return `<span class="dot ${d.group}"></span>${d.name}`}).join('<br>')}${x.better?`<small>Beter: ${x.better.name}</small>`:''}</th>
+    <td>${sdgDots(x.f.sdg)} <small class="blk">${x.dots} van 18</small></td>
+    ${x.done?`<td colspan="6" class="ok">Bereikt</td>`:`<td class="${x.tot.total===minT&&!x.better?'best':''}"><b>${coin(x.tot.total)}</b></td><td>${nf(x.tot.clicks)}</td><td>${tm(x.tot.minutes)}</td><td>${x.tot.races}</td><td>${x.tot.days}</td><td>${coin(x.tot.total/x.dots)}</td>`}</tr>`).join('')}
+  </tbody></table></div>
+  <p class="note">Kosten met ${mName(S.method).toLowerCase()}${S.includeFees?', inclusief inschrijfgeld':''}. Wat de fokbonus per combinatie aan beloning geeft, staat hier niet in omdat dat voor de gemengde combinaties nog niet bekend is.</p>`;
+}
+
+function candidatesAll(from){
+  const out={full:[],eng:[],west:[],fok:[],fok18:[]};
+  for(const m of METHODS){
+    const r=fullFor(m.id,from), byId=Object.fromEntries(r.ds.map(x=>[x.d.id,x]));
+    const pack=(x,extra={})=>({method:m,total:x.total,clicks:x.clicks,minutes:x.minutes,days:x.days,...extra});
+    out.full.push(pack(r.all)); out.eng.push(pack(r.eng)); out.west.push(pack(r.west));
+    for(const f of FOKBONUS){const sel=f.ids.map(id=>byId[id]); const tot=combine(sel,S); const name=f.ids.map(id=>DISCS.find(d=>d.id===id).name).join(' + ');
+      const dots=f.sdg.reduce((a,b)=>a+b,0), done=sel.every(x=>x.levels.length===0);
+      const c=pack(tot,{combo:name,dots,done}); out.fok.push(c); if(dots===18) out.fok18.push(c);}
+  }
+  return out;
+}
+function howText(m){
+  const k=makeCalc(S,m.id), T=S.target;
+  const parts=[['leeg',T],['25%',T-25],['50%',T-50]].map(([l,n])=>{const f=k.fb(n);return `Vanaf ${l}: ${groupCombo(f.combo)}${f.topUp?' (aangevuld)':''}`;});
+  const tag=m.id==='eigen'?'<span class="tag own">jouw eigen combo</span>':['gratis','gezellig','actief'].includes(m.id)?'<span class="tag">geen trainer, altijd dezelfde klik</span>':'<span class="tag">gekozen uit de aangeboden trainers</span>';
+  return `<span class="how">${tag}<br>${parts.join('<br>')}</span>`;
+}
+function winners(list){
+  const open=list.filter(x=>!x.done&&x.total>=0);
+  const by=(f)=>[...open].sort(f)[0];
+  return {
+    cheap:by((a,b)=>a.total-b.total||a.days-b.days||a.clicks-b.clicks),
+    fast:by((a,b)=>a.days-b.days||a.minutes-b.minutes||a.total-b.total),
+    clicks:by((a,b)=>a.clicks-b.clicks||a.total-b.total),
+    paid:[...open.filter(x=>x.method.id!=='gratis')].sort((a,b)=>a.total-b.total||a.days-b.days)[0],
+  };
+}
+function bestBlock(title,intro,list,done){
+  if(done) return `<h3>${title}</h3><p class="ok">Al bereikt.</p>`;
+  const w=winners(list); if(!w.cheap) return '';
+  const row=(lab,x)=>`<tr><th scope="row">${lab}</th><td class="lft"><b>${x.method.name}</b>${x.combo?`<small>${x.combo}${x.dots<18?`, ${x.dots} van 18 bolletjes`:''}</small>`:''}${howText(x.method)}</td><td>${coin(x.total)}</td><td>${nf(x.clicks)}</td><td>${tm(x.minutes)}</td><td>${x.days}</td></tr>`;
+  let verdict;
+  if(w.cheap===w.fast) verdict=`${w.cheap.method.name}${w.cheap.combo?' met '+w.cheap.combo:''} is hier zowel het goedkoopst als het snelst.`;
+  else verdict=`Het goedkoopst is ${coin(w.fast.total-w.cheap.total)} voordeliger dan het snelst, maar duurt ${w.cheap.days-w.fast.days>0?(w.cheap.days-w.fast.days)+' dag'+(w.cheap.days-w.fast.days===1?'':'en')+' langer':'even lang in dagen'} en kost ${tm(Math.max(0,w.cheap.minutes-w.fast.minutes))} meer rusttijd.`;
+  return `<h3>${title}</h3>${intro?`<p class="note">${intro}</p>`:''}
+  <div class="tw"><table class="best"><thead><tr><th></th><th class="lft">Kies</th><th>Munten</th><th>Klikjes</th><th>Rusttijd</th><th>Dagen</th></tr></thead><tbody>
+  ${row('Goedkoopst',w.cheap)}${w.paid&&w.paid!==w.cheap?row('Goedkoopst betaald',w.paid):''}${row('Snelst',w.fast)}${row('Minste klikjes',w.clicks)}</tbody></table></div>
+  <p class="verdict">${verdict}</p>`;
+}
+function vBeste(){
+  const from=S.bestFrom==='paard'?S.horse:null, c=candidatesAll(from);
+  const r=fullFor(S.method,from);
+  const doneG=g=>r.ds.filter(x=>x.d.group===g).every(x=>x.levels.length===0);
+  return `<h2>Wat is het goedkoopst en het snelst?</h2>
+  <p class="intro">Hier vergelijkt de app alle trainingsmethoden, inclusief je eigen combo, en alle fokbonuscombinaties met elkaar. "Snelst" betekent de minste dagen, en bij gelijke dagen de minste rusttijd.</p>
+  <div class="seg"><button type="button" data-bestfrom="nul" class="${S.bestFrom==='nul'?'on':''}" aria-pressed="${S.bestFrom==='nul'}">Vanaf een nieuw paard</button><button type="button" data-bestfrom="paard" class="${S.bestFrom==='paard'?'on':''}" aria-pressed="${S.bestFrom==='paard'}">Vanaf mijn paard</button></div>
+  ${bestBlock('Fokbonus, alle 18 bolletjes','Dressuur + Springen of alle drie de Western-disciplines.',c.fok18,c.fok18.every(x=>x.done)||c.fok18.some(x=>x.done))}
+  ${bestBlock('Fokbonus, elke combinatie','Ook de combinaties met minder bolletjes tellen mee.',c.fok,c.fok.some(x=>x.done))}
+  ${bestBlock('Volledige training','Alle vijf disciplines tot het hoogste niveau.',c.full,doneG('eng')&&doneG('west'))}
+  ${bestBlock('Engels volledig','Dressuur en Springen tot het hoogste niveau.',c.eng,doneG('eng'))}
+  ${bestBlock('Western volledig','Reining, Trail en Western Pleasure tot L1.',c.west,doneG('west'))}
+  <p class="note">De dagen gaan uit van maximaal ${S.racesPerDay} wedstrijden per discipline per dag en ${S.activeHours} speeluren per dag. Kosten ${S.includeFees?'inclusief':'zonder'} inschrijfgeld. Dit pas je aan onder Aannames.</p>`;
+}
+
+const simCache={};
+function simAll(from){
+  const key=JSON.stringify([S.method,S.target,S.avgEng,S.avgWest,S.ptsEng,S.ptsWest,S.racesPerDay,S.includeFees,S.rest,S.activeHours,S.startHour,S.prices,S.avail,S.custom,S.priceGezellig,S.priceActief,S.planOrder,from]);
+  if(!simCache[key]){ for(const k in simCache) delete simCache[k]; simCache[key]=STRATS.map(st=>({st,r:simulate(st.id,S,S.method,from)})); }
+  return simCache[key];
+}
+function groupOrderText(){const out=[]; for(const id of S.planOrder){const d=DISCS.find(z=>z.id===id); const n=d.group==='west'?'Western':d.name; if(!out.includes(n)) out.push(n);} return out.join(', dan ');}
+const stratName=st=>st.name, stratSub=st=>st.id==='groepen'?`eerst ${groupOrderText()}, elke groep helemaal klaar`:st.sub;
+const rpdCache={};
+function rpdCompare(from){
+  const key=JSON.stringify([S.planSel,S.method,S.target,S.avgEng,S.avgWest,S.ptsEng,S.ptsWest,S.rest,S.activeHours,S.startHour,S.prices,S.avail,S.custom,S.planOrder,from]);
+  if(!rpdCache[key]){ for(const k in rpdCache) delete rpdCache[k]; rpdCache[key]=[4,3,2,1].map(n=>({n,r:simulate(S.planSel,{...S,racesPerDay:n},S.method,from)})); }
+  return rpdCache[key];
+}
+function dur(min){ if(min===null) return '–'; const h=Math.round(min/60); const d=Math.floor(h/24), hh=h%24; return d?`${d} d ${hh} u`:`${hh} u`; }
+function clock(t){ if(t===null) return ''; const d=Math.floor(t/1440)+1, m=t%1440; return `dag ${d}, ${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+function vPlanning(){
+  const from=S.planFrom==='paard'?S.horse:null, res=simAll(from);
+  const cols=[['firstFok','Eerste fokbonus'],['west','Western klaar'],['eng','Engels klaar'],['all','Alles klaar']];
+  const H=v=>v===null?null:Math.round((v-res[0].r.t0)/60);
+  const best={}; cols.forEach(([k])=>{const v=res.map(x=>x.r[k]).filter(v=>v!==null&&v>res[0].r.t0).map(H); best[k]=v.length?Math.min(...v):null;});
+  const k=makeCalc(S,S.method), f=k.fb(S.target-50), cycle=5*f.clicks*S.rest, cycleAll=cycle*5;
+  const sel=res.find(x=>x.st.id===S.planSel)||res[0];
+  const bestOf=key=>res.filter(x=>x.r[key]!==null&&H(x.r[key])===best[key]).map(x=>x.st.name);
+  const ins=[];
+  ins.push(`Met ${mName(S.method).toLowerCase()} kost het hertrainen van één discipline na een wedstrijd ongeveer ${tm(cycle)} (5 balkjes, ${f.clicks} klik${f.clicks===1?'':'jes'} per balkje, ${S.rest} min rust per klik). Alle vijf samen is dat ${tm(cycleAll)}, en tussen twee wedstrijdblokken zit 3 uur.`);
+  ins.push(cycleAll<=180?`Je paard heeft dus genoeg tijd om alles tussen twee blokken bij te trainen. Het tempo wordt vooral bepaald door de ${S.racesPerDay} wedstrijden per dag en de nachten, en de volgorde maakt minder uit.`:`De rusttijd is hier de rem: je paard kan niet alles tussen twee blokken bijtrainen. Welke discipline voorrang krijgt, maakt dan echt verschil.`);
+  if(best.firstFok) ins.push(`Snelste weg naar een fokbonus: ${bestOf('firstFok').join(', ')} (${dur(best.firstFok*60)}).`);
+  if(best.all) ins.push(`Snelste weg naar allround: ${bestOf('all').join(', ')} (${dur(best.all*60)}).`);
+  const cell=(x,key)=>{const v=x.r[key]; if(v===null) return `<td class="muted">niet binnen 120 dagen</td>`; if(v===0||v<=x.r.t0) return `<td class="ok">al klaar</td>`; return `<td class="${H(v)===best[key]?'best':''}"><b>${dur(v-x.r.t0)}</b><small class="blk">${clock(v)}</small></td>`;};
+  return `<h2>In welke volgorde train je het snelst?</h2>
+  <p class="intro">Je paard kan maar één training tegelijk doen en rust daarna ${S.rest} minuten. De app speelt voor elke aanpak na hoe dat uitpakt: klik voor klik, wedstrijdblok voor wedstrijdblok. Elk niveau heeft zijn eigen starttijd binnen een wedstrijdblok, net als in het spel (Dressuur BB om :00, Springen B om :05, en zo verder). Je speelt elke dag van ${String(S.startHour).padStart(2,'0')}:00, ${S.activeHours} uur lang, en schrijft in zodra een discipline vol staat. Buiten die tijd lopen alleen de wedstrijden waarvoor je al ingeschreven stond.</p>
+  <div class="seg"><button type="button" data-planfrom="nul" class="${S.planFrom==='nul'?'on':''}" aria-pressed="${S.planFrom==='nul'}">Vanaf een nieuw paard</button><button type="button" data-planfrom="paard" class="${S.planFrom==='paard'?'on':''}" aria-pressed="${S.planFrom==='paard'}">Vanaf mijn paard</button></div>
+  <ul class="ins">${ins.map(t=>`<li>${t}</li>`).join('')}</ul>
+  <div class="tw"><table class="pick plan"><thead><tr><th>Aanpak</th>${cols.map(([,n])=>`<th>${n}</th>`).join('')}</tr></thead><tbody>
+  ${res.map(x=>`<tr data-plansel="${x.st.id}" tabindex="0" class="${x.st.id===sel.st.id?'cur':''}"><th scope="row">${stratName(x.st)}<small>${stratSub(x.st)}</small></th>${cols.map(([k])=>cell(x,k)).join('')}</tr>`).join('')}
+  </tbody></table></div>
+  <p class="note">De tijd telt vanaf de eerste dag om ${String(S.startHour).padStart(2,'0')}:00. Munten en klikjes zijn bij elke aanpak gelijk (${coin(sel.r.cost+sel.r.fees)}, ${nf(sel.r.clicks)} klikjes); alleen de volgorde verschilt. Klik op een rij voor de tijdlijn.</p>
+  <h3>${sel.st.name}: wat als je niet alle wedstrijden haalt?</h3>
+  <div class="tw"><table class="narrow"><thead><tr><th>Per dag</th>${cols.map(([,n])=>`<th>${n}</th>`).join('')}</tr></thead><tbody>
+  ${rpdCompare(from).map(({n,r})=>`<tr class="${n===S.racesPerDay?'sum':''}"><th scope="row">${n} van 4</th>${cols.map(([k])=>{const v=r[k]; return v===null?'<td class="muted">niet binnen 120 dagen</td>':v<=r.t0?'<td class="ok">al klaar</td>':`<td>${dur(v-r.t0)}</td>`;}).join('')}</tr>`).join('')}
+  </tbody></table></div>
+  <h3>Jouw volgorde</h3>
+  <p class="note" style="margin-top:0">Gebruikt door "In groepen na elkaar" (Western telt als één groep), "Eén discipline tegelijk" en "Eigen volgorde, voorrang".</p>
+  <ol class="order">${S.planOrder.map((id,i)=>{const d=DISCS.find(z=>z.id===id);return `<li><span><span class="dot ${d.group}"></span>${d.name}</span><span><button type="button" data-ord="${i}:-1" ${i===0?'disabled':''} aria-label="${d.name} omhoog">▲</button><button type="button" data-ord="${i}:1" ${i===S.planOrder.length-1?'disabled':''} aria-label="${d.name} omlaag">▼</button></span></li>`;}).join('')}</ol>
+  <h3>Tijdlijn: ${sel.st.name}${S.racesPerDay<4?`, ${S.racesPerDay} van 4 wedstrijden per dag`:''}</h3>
+  ${timeline(sel.r)}`;
+}
+function timeline(r){
+  const end=Math.max(r.all||0,...r.st.map(o=>o.doneAt||0)); const span=Math.max(1,end-r.t0); const days=Math.ceil(span/1440);
+  const pct=t=>((t-r.t0)/span*100);
+  const ticks=[]; const step=days>20?5:days>10?2:1; for(let d=0;d<=days;d+=step) ticks.push(d);
+  return `<div class="tl"><div class="tlaxis">${ticks.map(d=>`<span style="left:${Math.min(100,d*1440/span*100)}%">${d===0?'start':d+' d'}</span>`).join('')}</div>
+  ${r.st.map(o=>`<div class="tlrow"><div class="tln"><span class="dot ${o.d.group}"></span>${o.d.name}</div><div class="tltrack">
+    ${o.segs.map((g,i)=>`<span class="tlseg ${o.d.group} s${i%2}" style="left:${pct(g.from)}%;width:${Math.max(.3,pct(g.to)-pct(g.from))}%" title="${g.n}: ${dur(g.from-r.t0)} tot ${dur(g.to-r.t0)}">${pct(g.to)-pct(g.from)>6?g.n:''}</span>`).join('')}
+    ${o.doneAt&&o.doneAt>r.t0?`<span class="tlend" style="left:${pct(o.doneAt)}%" title="Klaar na ${dur(o.doneAt-r.t0)}"></span>`:''}
+  </div><div class="tldone">${o.doneAt===null?'niet klaar':o.doneAt<=r.t0?'al klaar':dur(o.doneAt-r.t0)}</div></div>`).join('')}
+  </div>`;
+}
+
+function phaseInfo(){
+  const r=simulate('klassement',S,S.method,null), t0=r.t0, by=Object.fromEntries(r.st.map(o=>[o.d.id,o]));
+  const promo=(id,n)=>{const g=by[id].segs.find(g=>g.n===n); return g?g.to:t0;};
+  const mixedEnd=Math.max(promo('dres','L1'),promo('spr','L'),promo('rei','L4'),promo('tra','L4'),promo('wp','L4'));
+  const opEnd=Math.max(by.spr.doneAt,by.rei.doneAt,by.tra.doneAt,by.wp.doneAt), dresEnd=by.dres.doneAt;
+  const cnt=(a,b)=>r.clickTimes.filter(t=>t>=a&&t<b).length;
+  const perDay=(a,b)=>b>a?cnt(a,b)/((b-a)/1440):0;
+  const dresAtOp=by.dres.segs.filter(g=>g.to<=opEnd).length;
+  return {r,t0,mixedEnd,opEnd,dresEnd,c1:cnt(t0,mixedEnd),c2:cnt(mixedEnd,opEnd),c3:cnt(opEnd,dresEnd+1),pd1:perDay(t0,mixedEnd),pd2:perDay(mixedEnd,opEnd),pd3:perDay(opEnd,dresEnd+1),dresLvlAtOp:DISCS[0].levels[dresAtOp].n};
+}
+const SG_ALT={Starters:'Instroom, Jonge paarden, Nieuwkomers',Basis:'Opleiding, Middengroep',Allround:'Fokbonus, Eindsprint',Opbouw:'Opleiding, Allround',Dressuur:'Dressuurstal, Afronding',Klaar:'Fokstal, Allround klaar'};
+function sgGroups(P){
+  const by=Object.fromEntries(P.r.st.map(o=>[o.d.id,o]));
+  const promo=(id,n)=>{const g=by[id].segs.find(g=>g.n===n); return g?g.to:P.t0;};
+  const tB=promo('dres','BB'), tL2=promo('dres','L1');
+  if(S.sgOpt==='simpel') return [
+    {n:'Opbouw',dres:'BB t/m L2',spr:'B t/m Z',west:'L5 t/m L2',bars:'2 tot 5, gemengd',from:P.t0,to:P.opEnd,move:'Springen en Western op het hoogste niveau staan (Western-fokbonus binnen)'},
+    {n:'Dressuur',dres:'M1 t/m ZZ-Licht',spr:'klaar',west:'klaar',bars:'altijd 5',from:P.opEnd,to:P.dresEnd,move:'Dressuur op ZZ-Zwaar staat'},
+    {n:'Klaar',dres:'ZZ-Zwaar',spr:'ZZ',west:'L1',bars:'–',from:P.dresEnd,to:null,move:''}];
+  return [
+    {n:'Starters',dres:'BB',spr:'B',west:'L5',bars:'overal 2',from:P.t0,to:tB,move:'Dressuur op B staat'},
+    {n:'Basis',dres:'B en L1',spr:'L en M',west:'L4 en L3',bars:'3 tot 5',from:tB,to:tL2,move:'Dressuur op L2 staat'},
+    {n:'Allround',dres:'L2',spr:'Z',west:'L2',bars:'overal 5',from:tL2,to:P.opEnd,move:'Springen en Western op het hoogste niveau staan (Western-fokbonus binnen)'},
+    {n:'Dressuur',dres:'M1 t/m ZZ-Licht',spr:'klaar',west:'klaar',bars:'overal 5',from:P.opEnd,to:P.dresEnd,move:'Dressuur op ZZ-Zwaar staat'},
+    {n:'Klaar',dres:'ZZ-Zwaar',spr:'ZZ',west:'L1',bars:'–',from:P.dresEnd,to:null,move:''}];
+}
+function vStalgroepen(){
+  const P=phaseInfo(), G=sgGroups(P), span=P.dresEnd-P.t0, w=x=>Math.max(0,x/span*100);
+  const k=makeCalc(S,S.method), T=S.target, fbx=n=>groupCombo(k.fb(n).combo);
+  const cnt=(a,b)=>P.r.clickTimes.filter(t=>t>=a&&t<b).length;
+  const h=S.horse, top=id=>DISCS.find(d=>d.id===id).levels.length-1;
+  const restDone=['spr','rei','tra','wp'].every(id=>h[id]>=top(id)), dresDone=h.dres>=top('dres');
+  let mine; if(restDone) mine=dresDone?'Klaar':'Dressuur'; else if(S.sgOpt==='simpel') mine='Opbouw'; else mine=h.dres===0?'Starters':h.dres<=2?'Basis':'Allround';
+  const anyAhead=!restDone&&S.sgOpt!=='simpel'&&h.dres>=3;
+  const tOff=m=>`${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`;
+  const cellHTML=(d,i)=>{const L=d.levels[i]; if(!L) return '<td></td>'; const isTop=i===d.levels.length-1; return `<td class="lc${isTop?' topl':''}"><b>${L.n}</b><span class="pills">${Array.from({length:L.bars},()=>'<span class="pill"></span>').join('')}</span><small>+${tOff(slotOffset(d.id,i))}${isTop?', top':''}</small></td>`;};
+  const colors=['g1','g2','g3','g4'];
+  const trained=G.filter(g=>g.to!==null);
+  return `<h2>Stalgroepen</h2>
+  <p class="intro">Bij allround trainen promoveren de disciplines van een paard ongeveer tegelijk. Een paard zit dus steeds in al zijn disciplines op dezelfde laag van het wedstrijdschema, en het Dressuur-niveau vertelt je in welke groep het hoort. Kies hoe fijn je wilt indelen.</p>
+  <div class="seg"><button type="button" data-sgopt="simpel" class="${S.sgOpt==='simpel'?'on':''}" aria-pressed="${S.sgOpt==='simpel'}">Simpel, 3 groepen</button><button type="button" data-sgopt="laag" class="${S.sgOpt!=='simpel'?'on':''}" aria-pressed="${S.sgOpt!=='simpel'}">Gestroomlijnd, per laag</button></div>
+  <p class="note">${S.sgOpt==='simpel'?'Je verplaatst een paard maar twee keer. In Opbouw zitten de eerste dagen wel verschillende aantallen balkjes door elkaar.':'In Starters, Allround en Dressuur heeft elk paard overal evenveel balkjes, dus elke ronde is hetzelfde. Alleen in Basis wisselt het nog. Je verplaatst een paard wel vier keer.'} Duur berekend voor een nieuw paard met ${mName(S.method).toLowerCase()}, ${S.racesPerDay} van 4 wedstrijden per dag.</p>
+  <div class="phase">${trained.map((g,i)=>`<span class="ph ${colors[i]}" style="width:${w(g.to-g.from)}%" title="${g.n}: ${dur(g.to-g.from)}"><b>${g.n}</b><small>${dur(g.to-g.from)}</small></span>`).join('')}</div>
+  <div class="phaxis"><span>start</span>${trained.slice(0,-1).map(g=>`<span style="left:${w(g.to-P.t0)}%">${dur(g.to-P.t0)}</span>`).join('')}<span style="left:100%">${dur(span)}</span></div>
+
+  <div class="tw"><table class="sgt"><thead><tr><th>Groep</th><th><span class="dot eng"></span>Dressuur</th><th><span class="dot eng"></span>Springen</th><th><span class="dot west"></span>Western</th><th>Balkjes</th><th>Duur</th><th>Klikjes per dag</th><th class="lft">Doorschuiven als</th></tr></thead><tbody>
+  ${G.map((g,i)=>`<tr class="${g.n===mine?'cur':''}"><th scope="row"><span class="gnum ${colors[i]||'g5'}">${i+1}</span> ${g.n}<small>ook: ${SG_ALT[g.n]}</small></th><td>${g.dres}</td><td>${g.spr}</td><td>${g.west}</td><td>${g.bars}</td><td>${g.to===null?'–':dur(g.to-g.from)}</td><td>${g.to===null||g.to<=g.from?'–':nf(cnt(g.from,g.to)/((g.to-g.from)/1440))}</td><td class="lft">${g.move||'Klaar om mee te fokken'}</td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="note">Western betekent Reining, Trail en Western Pleasure samen; die lopen gelijk op. Klikjes per dag gaat over één paard.</p>
+
+  <h3>Jouw paard</h3>
+  <p class="mine">Hoort in groep <b>${mine}</b>.${anyAhead?' Dressuur loopt voor op Springen of Western; het paard blijft in Allround tot die ook klaar zijn.':''} <span class="muted2">Gebaseerd op de niveaus onder Mijn paard.</span></p>
+
+  <h3>Tips</h3>
+  <ul class="ins">
+    <li>Start nieuwe paarden in lichtingen tegelijk. Dan zitten alle paarden in een groep op hetzelfde niveau en hebben ze evenveel balkjes.</li>
+    <li>Een nieuwe lichting ongeveer om de ${dur(P.opEnd-P.t0)} houdt de drukke groepen vóór Dressuur overzichtelijk.</li>
+    <li>De groepen vóór Dressuur kosten per paard ${nf(cnt(P.t0,P.opEnd)/((P.opEnd-P.t0)/1440))} klikjes per dag, de Dressuur-groep ${nf(cnt(P.opEnd,P.dresEnd+1)/((P.dresEnd-P.opEnd)/1440))}. Hoeveel paarden je tegelijk aankunt, hangt vooral af van hoeveel er vóór Dressuur zitten.</li>
+  </ul>
+
+  <h3>Vaste klikjes</h3>
+  <div class="tw"><table class="narrow"><thead><tr><th>Balkje staat op</th><th class="lft">Wanneer</th><th>Klikjes</th></tr></thead><tbody>
+    <tr><th scope="row">50%</th><td class="lft">Na elke wedstrijd, verreweg het vaakst</td><td>${fbx(T-50)}</td></tr>
+    <tr><th scope="row">25%</th><td class="lft">Bestaande balkjes na promoveren</td><td>${fbx(T-25)}</td></tr>
+    <tr><th scope="row">Leeg</th><td class="lft">Nieuwe balkjes na promoveren, en het eerste niveau</td><td>${fbx(T)}</td></tr>
+  </tbody></table></div>
+
+  <h3>Werkvolgorde: het schema in lagen</h3>
+  <p class="intro">Binnen een wedstrijdblok rijden de lagen na elkaar: de eerste vijf lagen elk in een blokje van 25 minuten, daarna alleen nog Dressuur. Train je binnen een groep van links naar rechts, dan train je in de volgorde waarin de wedstrijden starten.</p>
+  <div class="tw"><table class="lagen"><thead><tr><th>Laag</th>${DISCS.map(d=>`<th><span class="dot ${d.group}"></span>${d.name}</th>`).join('')}</tr></thead><tbody>
+    ${[0,1,2,3,4].map(i=>`<tr><th scope="row">${i+1}</th>${DISCS.map(d=>cellHTML(d,i)).join('')}</tr>`).join('')}
+    ${[5,6,7,8,9].map(i=>`<tr><th scope="row">${i+1}</th>${cellHTML(DISCS[0],i)}<td colspan="4"></td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="note">De tijd is hoe lang na de start van het blok de wedstrijd begint. Het hoogste niveau hoef je niet meer te trainen.</p>`;
+}
+const VIEWS={beste:['Beste keus',vBeste],overzicht:['Overzicht',vOverzicht],paard:['Mijn paard',vPaard],fokbonus:['Fokbonus',vFokbonus],planning:['Planning',vPlanning],stalgroepen:['Stalgroepen',vStalgroepen],niveaus:['Per niveau',vNiveaus],methoden:['Methoden',vMethoden],wedstrijden:['Wedstrijden',vWedstrijden],balkjes:['Balkjes',vBalkjes],aannames:['Aannames',vAannames]};
+function renderTabs(){$('#tabs').innerHTML=Object.entries(VIEWS).map(([id,[n]])=>`<button type="button" role="tab" aria-selected="${S.tab===id}" data-tab="${id}" class="${S.tab===id?'on':''}">${n}</button>`).join('');}
+function render(keepFocus){
+  const a=document.activeElement, key=a&&(a.dataset.set||a.dataset.price||a.dataset.txp||a.dataset.avail), kattr=a&&(a.dataset.set?'set':a.dataset.price?'price':a.dataset.txp?'txp':'avail'), sel=a&&a.selectionStart;
+  renderMethods(); renderRpd(); renderBuilder(); renderSummary(); renderTabs(); $('#view').innerHTML=VIEWS[S.tab][1]();
+  if(keepFocus&&key){const el=document.querySelector(`[data-${kattr}="${key}"]`); if(el){el.focus(); try{if(el.type!=='range'&&sel!=null)el.setSelectionRange(sel,sel);}catch(e){}}}
+  save();
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-sgopt],[data-rpd],[data-planfrom],[data-plansel],[data-ord],[data-builder],[data-bestfrom],[data-fbfrom],[data-method],[data-tab],[data-ldisc],[data-bar],[data-reset],[data-add],[data-rm],[data-clr]'); if(!t) return;
+  if(t.dataset.sgopt){S.sgOpt=t.dataset.sgopt;}
+  else if(t.dataset.rpd){S.racesPerDay=+t.dataset.rpd;}
+  else if(t.dataset.planfrom){S.planFrom=t.dataset.planfrom;}
+  else if(t.dataset.plansel){S.planSel=t.dataset.plansel;}
+  else if(t.dataset.ord){const [i,dir]=t.dataset.ord.split(':').map(Number); const j=i+dir; const o=[...S.planOrder]; [o[i],o[j]]=[o[j],o[i]]; S.planOrder=o;}
+  else if(t.dataset.builder){S.builderOpen=t.dataset.builder==='open';}
+  else if(t.dataset.bestfrom){S.bestFrom=t.dataset.bestfrom;}
+  else if(t.dataset.fbfrom){S.fbFrom=t.dataset.fbfrom;}
+  else if(t.dataset.add){const [k,c]=t.dataset.add.split(':'); (S.custom[k]=S.custom[k]||[]).push(c); if(S.custom[k].length>30) S.custom[k].pop();}
+  else if(t.dataset.rm){const [k,i]=t.dataset.rm.split(':'); S.custom[k].splice(+i,1);}
+  else if(t.dataset.clr!==undefined){S.custom[t.dataset.clr]=[];}
+  else if(t.dataset.method) S.method=t.dataset.method;
+  else if(t.dataset.tab) S.tab=t.dataset.tab;
+  else if(t.dataset.ldisc) S.levelDisc=t.dataset.ldisc;
+  else if(t.dataset.bar!==undefined) S.barStart=+t.dataset.bar;
+  else if(t.hasAttribute('data-reset')){ if(confirm('Alle aannames terugzetten naar de standaardwaarden?')){const keep={tab:S.tab,horse:S.horse,custom:S.custom,method:S.method}; S={...JSON.parse(JSON.stringify(DEFAULTS)),...keep};} }
+  render();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('tr[data-method]')){S.method=e.target.dataset.method;render();} if(e.key==='Enter'&&e.target.matches('tr[data-plansel]')){S.planSel=e.target.dataset.plansel;render();}});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.set==='barStart'){ S.barStart=+t.value; $('#barVal').textContent=S.barStart+'%'; $('#barsOut').innerHTML=barsHTML(); document.querySelectorAll('[data-bar]').forEach(b=>b.classList.toggle('on',+b.dataset.bar===S.barStart)); save(); return; }
+  if(t.dataset.set){ const k=t.dataset.set; if(t.type==='checkbox') S[k]=t.checked; else { const v=parseFloat(t.value); if(isNaN(v)||v<0) return;
+      if(['avgEng','avgWest','ptsEng','ptsWest','racesPerDay','activeHours'].includes(k)&&v<=0) return;
+      if(k==='target'&&(v<50||v>100)) return;
+      S[k]=v; if(k==='target') S.barStart=Math.min(S.barStart,v); } render(true); }
+  else if(t.dataset.price){ const v=parseFloat(t.value); if(isNaN(v)) return; S.prices[t.dataset.price]=v; render(true); }
+  else if(t.dataset.txp){ const v=parseFloat(t.value); if(isNaN(v)||v<0) return; S.trainerXPs[t.dataset.txp]=v; render(true); }
+  else if(t.dataset.avail){ S.avail[t.dataset.avail]=t.checked; render(true); }
+});
+document.addEventListener('change',e=>{ if(e.target.dataset.horse){ S.horse[e.target.dataset.horse]=+e.target.value; render(); } });
+render();
+</script></body></html>
