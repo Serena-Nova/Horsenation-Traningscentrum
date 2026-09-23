@@ -137,6 +137,11 @@ table.lagen td.lc b{display:block}
 table.lagen td.lc .pills{margin:3px 0 2px}
 table.lagen td.lc .pill{background:var(--brass);border-color:var(--brass)}
 table.lagen td.topl{opacity:.5}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin:12px 0}
+.rules>div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;font-size:13.5px}
+.rules span{color:var(--muted)}
+.pls{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:6px}
+.plf .fld{grid-template-columns:1fr 80px}
 #summary{margin-top:22px;border-top:3px solid var(--ink);padding-top:14px}
 .lead{margin:0 0 10px;color:var(--muted)}
 .big{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px 26px}
@@ -283,17 +288,20 @@ function fillCustom(need,S){
   return {clicks,cost,xp,combo,topUp,key};
 }
 const DEFAULTS = {
-  method:'meest', target:100, avgEng:2, avgWest:20, ptsEng:10, ptsWest:100, racesPerDay:4,
-  includeFees:true, prizePct:0, rest:2, activeHours:12, lessonXP:4,
+  method:'meest', target:100, avgEng:2, avgSpr:2, avgWest:20, ptsEng:10, ptsWest:100, racesPerDay:4,
+  includeFees:true, pl:{eng:[0,0,0],west:[0,0,0]}, rest:2, activeHours:12, lessonXP:4,
   avail:{10:false,11:false,12:false,13:false,14:false,15:false,16:false,17:true,18:false,19:false,20:true},
   trainerXPs:{10:5,11:5,12:4,13:4,14:3,15:3,16:3,17:1,18:1,19:1,20:1},
   raceXP:50,
   priceGezellig:15, priceActief:20, prices:{...PRICES_DEFAULT},
-  promoXP:50, comboEngCoins:5000, comboEngXP:500, comboWestCoins:5000, comboWestXP:500, allCoins:15000, allXP:1250,
+  promoStep:25, comboEngCoins:5000, comboEngXP:500, comboWestCoins:5000, comboWestXP:500, allCoins:15000, allXP:1250,
   horse:{dres:0,spr:0,rei:0,tra:0,wp:0},
   custom:{0:['t20','t20','t20','t20','t20'],25:['t20','t20','t20','t17'],50:['t17','t17','t17']}, levelDisc:'dres', barStart:50, tab:'overzicht', fbFrom:'nul', bestFrom:'nul', builderOpen:true, startHour:8, planOrder:['rei','tra','wp','spr','dres'], planFrom:'nul', planSel:'westprio', sgOpt:'laag'
 };
 
+function avgFor(d,S){ return d.id==='spr'?S.avgSpr:d.group==='eng'?S.avgEng:S.avgWest; }
+function prizeFactor(d,S){ const p=(S.pl&&S.pl[d.group])||[0,0,0]; return (+p[0]+0.5*p[1]+0.25*p[2])/100; }
+function promoXPFor(i,S){ return S.promoStep*(i+2); }
 function methodSteps(id,S){
   const pr=S.prices, trainer=ps=>ps.map(p=>({p,c:+pr[p],xp:+(S.trainerXPs[p]||0)}));
   let av=Object.keys(S.avail).filter(p=>S.avail[p]).map(Number); if(!av.length) av=[20];
@@ -326,13 +334,13 @@ function makeCalc(S,methodId){
   function level(d,i){
     const L=d.levels[i], prev=i>0?d.levels[i-1].bars:0;
     const starts=i===0?Array(L.bars).fill(0):[...Array(prev).fill(25),...Array(L.bars-prev).fill(0)];
-    const eng=d.group==='eng', races=Math.ceil((eng?S.ptsEng:S.ptsWest)/(eng?S.avgEng:S.avgWest));
+    const eng=d.group==='eng', races=Math.ceil((eng?S.ptsEng:S.ptsWest)/avgFor(d,S));
     let cost=0,clicks=0,xp=0;
     for(const s of starts){const f=fb(T-s);cost+=f.cost;clicks+=f.clicks;xp+=f.xp;}
     const r=fb(T-50), again=(races-1)*L.bars;
     cost+=again*r.cost; clicks+=again*r.clicks; xp+=again*r.xp;
-    const fees=S.includeFees?races*L.fee:0, prize=races*L.prize*S.prizePct/100;
-    return {name:L.n,bars:L.bars,starts,races,train:cost,fees,total:cost+fees,clicks,xp:xp+S.promoXP+races*S.raceXP,prize,minutes:clicks*S.rest,level:L};
+    const fees=S.includeFees?races*L.fee:0, prize=races*L.prize*prizeFactor(d,S);
+    return {name:L.n,bars:L.bars,starts,races,train:cost,fees,total:cost+fees,clicks,xp:xp+promoXPFor(i,S)+races*S.raceXP,promoXP:promoXPFor(i,S),prize,minutes:clicks*S.rest,level:L};
   }
   function disc(d,from=0){
     const lv=[]; for(let i=from;i<d.levels.length-1;i++) lv.push(level(d,i));
@@ -382,7 +390,7 @@ function simulate(stratId,S,methodId,from){
     const starts=o.lvl===0?Array(L.bars).fill(0):[...Array(prev).fill(25),...Array(L.bars-prev).fill(0)];
     o.bars=starts.map(v=>({v,plan:plan(T-v)}));
   }
-  const need=o=>o.d.group==='eng'?S.ptsEng:S.ptsWest, avg=o=>o.d.group==='eng'?S.avgEng:S.avgWest;
+  const need=o=>o.d.group==='eng'?S.ptsEng:S.ptsWest, avg=o=>avgFor(o.d,S);
   const left=o=>o.bars.reduce((a,b)=>a+b.plan.length,0);
   const t0=Math.round(S.startHour*60), activeLen=Math.round(S.activeHours*60);
   const active=t=>{const m=((t-t0)%1440+1440)%1440; return m<activeLen;};
@@ -439,7 +447,7 @@ function simulate(stratId,S,methodId,from){
 function groupCombo(c){const g=[];for(const p of c){const l=g.at(-1);if(l&&l.p===p)l.n++;else g.push({p,n:1});}return g.map(x=>(x.n>1?x.n+' × ':'')+x.p+'%').join(' + ');}
 const KEY='hn-trainingscentrum-v1';
 let S=JSON.parse(JSON.stringify(DEFAULTS));
-try{const raw=localStorage.getItem(KEY); if(raw){const o=JSON.parse(raw); S={...S,...o,prices:{...S.prices,...(o.prices||{})},horse:{...S.horse,...(o.horse||{})},planOrder:(o.planOrder&&o.planOrder.length===5)?o.planOrder:S.planOrder,custom:{...S.custom,...(o.custom||{})},avail:{...S.avail,...(o.avail||{})},trainerXPs:{...S.trainerXPs,...(o.trainerXPs||{})}}; if(o.trainerXPs&&o.trainerXPs[17]===2&&o.trainerXPs[20]===1) S.trainerXPs[17]=1; if(S.raceXP===undefined) S.raceXP=50; if(!METHODS.some(m=>m.id===S.method)) S.method='meest';}}catch(e){}
+try{const raw=localStorage.getItem(KEY); if(raw){const o=JSON.parse(raw); S={...S,...o,prices:{...S.prices,...(o.prices||{})},horse:{...S.horse,...(o.horse||{})},planOrder:(o.planOrder&&o.planOrder.length===5)?o.planOrder:S.planOrder,custom:{...S.custom,...(o.custom||{})},avail:{...S.avail,...(o.avail||{})},trainerXPs:{...S.trainerXPs,...(o.trainerXPs||{})}}; if(o.trainerXPs&&o.trainerXPs[17]===2&&o.trainerXPs[20]===1) S.trainerXPs[17]=1; if(S.raceXP===undefined) S.raceXP=50; if(S.avgSpr===undefined) S.avgSpr=2; if(!S.pl) S.pl={eng:[0,0,0],west:[0,0,0]}; if(S.promoStep===undefined) S.promoStep=25; if(S.avgSpr>2) S.avgSpr=2; if(!METHODS.some(m=>m.id===S.method)) S.method='meest';}}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 const nf=n=>Math.round(n).toLocaleString('nl-NL');
 const coin=n=>'Ħ\u202f'+nf(n);
@@ -461,6 +469,7 @@ function fullFor(methodId,from){
   return {k,ds,eng,west,all};
 }
 
+function promoTotal(){return DISCS.reduce((a,d)=>{for(let i=0;i<d.levels.length-1;i++)a+=promoXPFor(i,S);return a;},0);}
 function renderRpd(){
   $('#rpdbar').innerHTML=`<span>Wedstrijden per discipline per dag die je haalt</span><div class="seg">${[4,3,2,1].map(n=>`<button type="button" data-rpd="${n}" class="${S.racesPerDay===n?'on':''}" aria-pressed="${S.racesPerDay===n}">${n} van 4</button>`).join('')}</div><small>Geldt voor alle dagen en tijden in de app.</small>`;
 }
@@ -478,7 +487,7 @@ function renderSummary(){
     <div><span class="num">${tm(r.minutes)}</span><span class="lab">rusttijd bij elkaar</span></div>
     <div><span class="num">${r.days} dagen</span><span class="lab">minimaal, ${r.races} wedstrijden</span></div>
   </div>
-  <p class="net">Beloningen samen ${coin(rw.coins)} en ${nf(rw.xp+r.xp)} XP${S.prizePct?`, plus ongeveer ${coin(r.prize)} prijzengeld`:''}. Netto: <b class="${net<0?'neg':'pos'}">${signed(net)}</b>${S.prizePct?'':' zonder prijzengeld'}.</p>`;
+  <p class="net">Beloningen samen ${coin(rw.coins)} en ${nf(rw.xp+r.xp)} XP${r.prize?`, plus ongeveer ${coin(r.prize)} prijzengeld`:''}. Netto: <b class="${net<0?'neg':'pos'}">${signed(net)}</b>${r.prize?'':' zonder prijzengeld'}.</p>`;
 }
 
 function rowTot(label,x,rw,cls=''){
@@ -538,7 +547,7 @@ function vNiveaus(){
   const k=makeCalc(S,S.method), d=DISCS.find(x=>x.id===S.levelDisc), r=k.disc(d);
   return `<h2>Niveau voor niveau</h2>
   <div class="seg">${DISCS.map(x=>`<button type="button" data-ldisc="${x.id}" class="${x.id===S.levelDisc?'on':''}" aria-pressed="${x.id===S.levelDisc}">${x.icon} ${x.name}</button>`).join('')}</div>
-  <p class="intro">Per niveau vul je de balkjes eerst vanaf de stand na promoveren. Na elke wedstrijd zonder promotie zakken ze naar 50% en train je ze weer naar ${S.target}%. Met gemiddeld ${d.group==='eng'?S.avgEng:S.avgWest} punten per wedstrijd en ${d.group==='eng'?S.ptsEng:S.ptsWest} punten nodig zijn dat ${r.levels[0]?.races} wedstrijden per niveau.</p>
+  <p class="intro">Per niveau vul je de balkjes eerst vanaf de stand na promoveren. Na elke wedstrijd zonder promotie zakken ze naar 50% en train je ze weer naar ${S.target}%. Met gemiddeld ${avgFor(d,S)} punten per wedstrijd en ${d.group==='eng'?S.ptsEng:S.ptsWest} punten nodig zijn dat ${r.levels[0]?.races} wedstrijden per niveau.</p>
   <div class="tw"><table><thead><tr><th>Niveau</th><th>Balkjes na promoveren</th><th>Wedstr.</th><th>Training</th><th>Inschrijfgeld</th><th>Totaal</th><th>Klikjes</th><th>Rusttijd</th></tr></thead><tbody>
   ${r.levels.map(l=>`<tr><th scope="row">${l.name}</th><td>${barPills(l.starts)} <small>${l.starts.filter(s=>s===25).length?l.starts.filter(s=>s===25).length+'×25%':''}${l.starts.filter(s=>s===25).length&&l.starts.filter(s=>s===0).length?' + ':''}${l.starts.filter(s=>s===0).length?l.starts.filter(s=>s===0).length+' leeg':''}</small></td><td>${l.races}</td><td>${coin(l.train)}</td><td>${coin(l.fees)}</td><td><b>${coin(l.total)}</b></td><td>${l.clicks}</td><td>${tm(l.minutes)}</td></tr>`).join('')}
   <tr><th scope="row">${d.levels.at(-1).n}</th><td colspan="7" class="muted">Hoogste niveau, hier hoef je niet meer voor te trainen.</td></tr>
@@ -553,7 +562,7 @@ function vMethoden(){
   return `<h2>Trainingsmethoden naast elkaar</h2>
   <p class="intro">Alles voor een volledige training, dus alle vijf disciplines tot het hoogste niveau. Klik een rij aan om die methode te kiezen.</p>
   <div class="tw"><table class="pick"><thead><tr><th>Methode</th><th>Training</th><th>Totaal</th><th>Klikjes</th><th>Rusttijd</th><th>Trainings-XP</th><th>Min. dagen</th></tr></thead><tbody>
-  ${res.map(({m,r})=>`<tr data-method="${m.id}" tabindex="0" class="${m.id===S.method?'cur':''}"><th scope="row">${m.name}<small>${m.sub}</small></th><td>${coin(r.train)}</td><td class="${r.total===minT?'best':''}"><b>${coin(r.total)}</b></td><td class="${r.clicks===minC?'best':''}">${nf(r.clicks)}</td><td>${tm(r.minutes)}</td><td>${nf(r.xp-S.promoXP*(9+4*4)-r.races*S.raceXP)}</td><td>${r.days}</td></tr>`).join('')}
+  ${res.map(({m,r})=>`<tr data-method="${m.id}" tabindex="0" class="${m.id===S.method?'cur':''}"><th scope="row">${m.name}<small>${m.sub}</small></th><td>${coin(r.train)}</td><td class="${r.total===minT?'best':''}"><b>${coin(r.total)}</b></td><td class="${r.clicks===minC?'best':''}">${nf(r.clicks)}</td><td>${tm(r.minutes)}</td><td>${nf(r.xp-promoTotal()-r.races*S.raceXP)}</td><td>${r.days}</td></tr>`).join('')}
   </tbody></table></div>
   <p class="note">Trainings-XP is de XP die jij als eigenaar per klik krijgt: 4 bij een rit of les. Bij een trainer hangt het af van het niveau van de trainer, niet van het percentage dat hij geeft: een beginnende trainer (10%) geeft 5 XP, een mastertrainer maar 1 XP, ook als hij 17% kiest. Daarbovenop krijg je ${S.raceXP} XP per wedstrijd en XP per promotie.</p>
   <h2>Prijs per procent</h2>
@@ -565,13 +574,25 @@ function vMethoden(){
 function vWedstrijden(){
   const k=makeCalc(S,S.method);
   const seen=new Set(), groups=DISCS.filter(d=>d.group==='eng'||(!seen.has('w')&&seen.add('w')));
-  return `<h2>Wat kost één wedstrijd?</h2>
-  <p class="intro">Na een wedstrijd staan alle balkjes op 50%. Voor de volgende wedstrijd train je ze terug naar ${S.target}% en betaal je inschrijfgeld. De kolom "Quitte bij" laat zien welk deel van de hoofdprijs je gemiddeld moet winnen om die kosten terug te verdienen.</p>
-  ${groups.map(d=>`<h3><span class="dot ${d.group}"></span>${d.group==='west'?'🤠 Western (per discipline)':d.icon+' '+d.name}</h3>
-  <div class="tw"><table><thead><tr><th>Niveau</th><th>Inschrijfgeld</th><th>Hertrainen</th><th>Kosten per wedstrijd</th><th>Hoofdprijs</th><th>Quitte bij</th></tr></thead><tbody>
-  ${d.levels.map((l,i)=>{const r=k.racePerLevel(d,i),q=r.cost/r.prize;return `<tr><th scope="row">${r.name}</th><td>${r.fee?coin(r.fee):'gratis'}</td><td>${coin(r.retrain)} <small>${r.clicks} klikjes</small></td><td><b>${coin(r.cost)}</b></td><td>${coin(r.prize)}</td><td><span class="meter"><i style="width:${Math.min(100,q*100)}%"></i></span> ${Math.round(q*100)}%</td></tr>`}).join('')}
-  </tbody></table></div>`).join('')}
-  <p class="note">Hoe het prijzengeld over de plaatsen verdeeld wordt, is nog niet bekend. De hoofdprijs is het bedrag voor de eerste plaats.</p>`;
+  const netCell=v=>`<td class="${v<0?'neg':'pos'}">${signed(v)}</td>`;
+  const plIn=(g,lab)=>`<fieldset class="plf"><legend>${lab}</legend>${['1e','2e','3e'].map((p,i)=>`<label class="fld"><span>${p} plaats (% van je wedstrijden)</span><input type="number" min="0" max="100" data-pl="${g}:${i}" value="${S.pl[g][i]}"></label>`).join('')}</fieldset>`;
+  const hasPl=g=>S.pl[g].some(v=>+v>0);
+  return `<h2>Wat levert één wedstrijd op?</h2>
+  <p class="intro">Na een wedstrijd staan alle balkjes op 50%. Voor de volgende wedstrijd train je ze terug naar ${S.target}% en betaal je inschrijfgeld. Daar staat prijzengeld tegenover: de 1e plaats krijgt de hoofdprijs, de 2e de helft en de 3e een kwart. Elke wedstrijd geeft je ook ${S.raceXP} XP.</p>
+  <div class="rules">
+    <div><b>🎀 Dressuur</b><span>0 punten onder 60%, 1 bij 60 tot 64%, 2 bij 65 tot 69%, 3 bij 70% en hoger. Telt de dressuurstat.</span></div>
+    <div><b>🏇 Springen</b><span>2 punten bij een schone rit, 1 bij 1 tot 4 strafpunten, 0 bij 5 of meer. Een balk kost 4 strafpunten. Telt de springstat.</span></div>
+    <div><b>🤠 Western</b><span>10 punten vanaf 65%, 20 vanaf 72%, 30 vanaf 80%. Telt de stat van die discipline.</span></div>
+    <div><b>Promoveren</b><span>Handmatig vanaf 10 punten (Western 100), automatisch bij 30 (Western 300). Promotie-XP groeit met het niveau: 50 XP naar niveau 2, 250 XP naar ZZ-Zwaar.</span></div>
+  </div>
+  <h3>Hoe vaak eindig je op het podium?</h3>
+  <p class="note" style="margin-top:0">Vul in hoe vaak je ongeveer 1e, 2e of 3e wordt. Dit telt mee in alle berekeningen van de app, als prijzengeld dat je terugverdient.</p>
+  <div class="pls">${plIn('eng','Dressuur en Springen')}${plIn('west','Western')}</div>
+  ${groups.map(d=>{const f=prizeFactor(d,S);return `<h3><span class="dot ${d.group}"></span>${d.group==='west'?'🤠 Western (per discipline)':d.icon+' '+d.name}</h3>
+  <div class="tw"><table><thead><tr><th>Niveau</th><th>Kosten per wedstrijd</th><th>1e</th><th>2e</th><th>3e</th><th>Netto bij 1e</th><th>Netto bij 2e</th><th>Netto bij 3e</th><th>Netto zonder podium</th>${hasPl(d.group)?'<th>Gemiddeld netto</th>':''}</tr></thead><tbody>
+  ${d.levels.map((l,i)=>{const r=k.racePerLevel(d,i),p=r.prize;return `<tr><th scope="row">${r.name}</th><td><b>${coin(r.cost)}</b><small class="blk">${r.fee?coin(r.fee)+' inschrijving':'gratis inschrijving'}</small></td><td>${coin(p)}</td><td>${coin(p/2)}</td><td>${coin(p/4)}</td>${netCell(p-r.cost)}${netCell(p/2-r.cost)}${netCell(p/4-r.cost)}${netCell(-r.cost)}${hasPl(d.group)?netCell(p*f-r.cost):''}</tr>`}).join('')}
+  </tbody></table></div>`;}).join('')}
+  <p class="note">Kosten per wedstrijd zijn het inschrijfgeld plus het terugtrainen van 50% naar ${S.target}% met ${mName(S.method).toLowerCase()}.</p>`;
 }
 
 function vBalkjes(){
@@ -596,12 +617,12 @@ function vAannames(){
   <div class="sets">
   <fieldset><legend>Wedstrijden</legend>
     ${num('target','Balkjes trainen tot (%)',{min:80,max:100,hint:'inschrijven kan vanaf 80%'})}
-    ${num('avgEng','Gemiddelde winstpunten Dressuur en Springen',{min:1,max:3,step:.5})}
+    ${num('avgEng','Gemiddelde winstpunten Dressuur',{min:.5,max:3,step:.5,hint:'0 tot 3 per wedstrijd'})}
+    ${num('avgSpr','Gemiddelde winstpunten Springen',{min:.5,max:2,step:.5,hint:'0 tot 2, 2 is een schone rit'})}
     ${num('ptsEng','Punten nodig om te promoveren',{min:1})}
-    ${num('avgWest','Gemiddelde winstpunten Western',{min:10,max:30,step:5})}
+    ${num('avgWest','Gemiddelde winstpunten Western',{min:5,max:30,step:5,hint:'10, 20 of 30 per wedstrijd'})}
     ${num('ptsWest','Punten nodig om te promoveren (Western)',{min:1})}
     <label class="fld chk"><input type="checkbox" data-set="includeFees" ${S.includeFees?'checked':''}><span>Inschrijfgeld meetellen</span></label>
-    ${num('prizePct','Gemiddeld prijzengeld (% van hoofdprijs)',{max:100,hint:'0 = niet meetellen'})}
   </fieldset>
   <fieldset><legend>Tijd</legend>
     ${num('rest','Rusttijd per trainingsklik (min)',{min:0,step:.5})}
@@ -610,7 +631,7 @@ function vAannames(){
   </fieldset>
   <fieldset><legend>Beloningen</legend>
     ${num('raceXP','XP per wedstrijd')}
-    ${num('promoXP','XP per promotie',{hint:'schatting, tussen 50 en 75'})}
+    ${num('promoStep','XP per promotie, per niveaunummer',{hint:'25: naar niveau 2 is 50 XP, naar niveau 10 is 250 XP'})}
     ${num('comboEngCoins','Fokbonus Engels, munten')}${num('comboEngXP','Fokbonus Engels, XP')}
     ${num('comboWestCoins','Fokbonus Western, munten')}${num('comboWestXP','Fokbonus Western, XP')}
     ${num('allCoins','Allround, munten')}${num('allXP','Allround, XP')}
@@ -635,13 +656,14 @@ function vAannames(){
     <li>Een paard begint in elke discipline op het laagste niveau met 2 lege balkjes.</li>
     <li>Bij promoveren gaan bestaande balkjes naar 25% en starten nieuwe balkjes op 0%.</li>
     <li>Na een wedstrijd zonder promotie zakken alle balkjes van dat niveau naar 50%.</li>
+    <li>Prijzengeld: de 1e plaats krijgt de hoofdprijs, de 2e de helft, de 3e een kwart.</li>
     <li>Per niveau rijd je zoveel wedstrijden als nodig is om de promotiepunten te halen met je gemiddelde winstpunten.</li>
     <li>Elke trainingsklik geeft het paard ${S.rest} minuten rust, of het nu een les, een rit of een trainer is.</li>
     <li>Bij de trainer-methoden zoekt de app met de trainers die jij als aangeboden hebt aangevinkt de combinatie die het balkje minstens tot je doel brengt: met de minste klikjes, of bij "goedkoopst" met de minste munten.</li>
     <li>De beloning voor volledige training telt beide fokbonussen en de allroundbeloning mee.</li>
   </ul>
   <h2>Nog onbekend</h2>
-  <ul class="ins"><li>XP per trainerklik tussen 10% en 20%, en de prijzen voor trainer 13% en 19%.</li><li>Hoe het prijzengeld over de plaatsen verdeeld is.</li><li>Precieze XP per promotie.</li><li>Of je beide fokbonussen krijgt naast de allroundbeloning.</li></ul>`;
+  <ul class="ins"><li>XP per trainerklik tussen 10% en 20%, en de prijzen voor trainer 13% en 19%.</li><li>Hoe vaak je gemiddeld op het podium komt; dat vul je in bij Wedstrijden.</li><li>De XP per promotie voor Springen en Western op de hogere niveaus; de app gaat uit van dezelfde opbouw als Dressuur.</li><li>Of je beide fokbonussen krijgt naast de allroundbeloning.</li></ul>`;
 }
 
 
@@ -757,7 +779,7 @@ function vBeste(){
 
 const simCache={};
 function simAll(from){
-  const key=JSON.stringify([S.method,S.target,S.avgEng,S.avgWest,S.ptsEng,S.ptsWest,S.racesPerDay,S.includeFees,S.rest,S.activeHours,S.startHour,S.prices,S.avail,S.custom,S.priceGezellig,S.priceActief,S.planOrder,from]);
+  const key=JSON.stringify([S.method,S.target,S.avgEng,S.avgSpr,S.avgWest,S.ptsEng,S.ptsWest,S.racesPerDay,S.includeFees,S.rest,S.activeHours,S.startHour,S.prices,S.avail,S.custom,S.priceGezellig,S.priceActief,S.planOrder,from]);
   if(!simCache[key]){ for(const k in simCache) delete simCache[k]; simCache[key]=STRATS.map(st=>({st,r:simulate(st.id,S,S.method,from)})); }
   return simCache[key];
 }
@@ -765,7 +787,7 @@ function groupOrderText(){const out=[]; for(const id of S.planOrder){const d=DIS
 const stratName=st=>st.name, stratSub=st=>st.id==='groepen'?`eerst ${groupOrderText()}, elke groep helemaal klaar`:st.sub;
 const rpdCache={};
 function rpdCompare(from){
-  const key=JSON.stringify([S.planSel,S.method,S.target,S.avgEng,S.avgWest,S.ptsEng,S.ptsWest,S.rest,S.activeHours,S.startHour,S.prices,S.avail,S.custom,S.planOrder,from]);
+  const key=JSON.stringify([S.planSel,S.method,S.target,S.avgEng,S.avgSpr,S.avgWest,S.ptsEng,S.ptsWest,S.rest,S.activeHours,S.startHour,S.prices,S.avail,S.custom,S.planOrder,from]);
   if(!rpdCache[key]){ for(const k in rpdCache) delete rpdCache[k]; rpdCache[key]=[4,3,2,1].map(n=>({n,r:simulate(S.planSel,{...S,racesPerDay:n},S.method,from)})); }
   return rpdCache[key];
 }
@@ -893,7 +915,7 @@ function vStalgroepen(){
 const VIEWS={beste:['Beste keus',vBeste],overzicht:['Overzicht',vOverzicht],paard:['Mijn paard',vPaard],fokbonus:['Fokbonus',vFokbonus],planning:['Planning',vPlanning],stalgroepen:['Stalgroepen',vStalgroepen],niveaus:['Per niveau',vNiveaus],methoden:['Methoden',vMethoden],wedstrijden:['Wedstrijden',vWedstrijden],balkjes:['Balkjes',vBalkjes],aannames:['Aannames',vAannames]};
 function renderTabs(){$('#tabs').innerHTML=Object.entries(VIEWS).map(([id,[n]])=>`<button type="button" role="tab" aria-selected="${S.tab===id}" data-tab="${id}" class="${S.tab===id?'on':''}">${n}</button>`).join('');}
 function render(keepFocus){
-  const a=document.activeElement, key=a&&(a.dataset.set||a.dataset.price||a.dataset.txp||a.dataset.avail), kattr=a&&(a.dataset.set?'set':a.dataset.price?'price':a.dataset.txp?'txp':'avail'), sel=a&&a.selectionStart;
+  const a=document.activeElement, key=a&&(a.dataset.set||a.dataset.price||a.dataset.txp||a.dataset.avail||a.dataset.pl), kattr=a&&(a.dataset.set?'set':a.dataset.price?'price':a.dataset.txp?'txp':a.dataset.pl?'pl':'avail'), sel=a&&a.selectionStart;
   renderMethods(); renderRpd(); renderBuilder(); renderSummary(); renderTabs(); $('#view').innerHTML=VIEWS[S.tab][1]();
   if(keepFocus&&key){const el=document.querySelector(`[data-${kattr}="${key}"]`); if(el){el.focus(); try{if(el.type!=='range'&&sel!=null)el.setSelectionRange(sel,sel);}catch(e){}}}
   save();
@@ -923,11 +945,12 @@ document.addEventListener('input',e=>{
   const t=e.target;
   if(t.dataset.set==='barStart'){ S.barStart=+t.value; $('#barVal').textContent=S.barStart+'%'; $('#barsOut').innerHTML=barsHTML(); document.querySelectorAll('[data-bar]').forEach(b=>b.classList.toggle('on',+b.dataset.bar===S.barStart)); save(); return; }
   if(t.dataset.set){ const k=t.dataset.set; if(t.type==='checkbox') S[k]=t.checked; else { const v=parseFloat(t.value); if(isNaN(v)||v<0) return;
-      if(['avgEng','avgWest','ptsEng','ptsWest','racesPerDay','activeHours'].includes(k)&&v<=0) return;
+      if(['avgEng','avgSpr','avgWest','ptsEng','ptsWest','racesPerDay','activeHours'].includes(k)&&v<=0) return;
       if(k==='target'&&(v<50||v>100)) return;
       S[k]=v; if(k==='target') S.barStart=Math.min(S.barStart,v); } render(true); }
   else if(t.dataset.price){ const v=parseFloat(t.value); if(isNaN(v)) return; S.prices[t.dataset.price]=v; render(true); }
   else if(t.dataset.txp){ const v=parseFloat(t.value); if(isNaN(v)||v<0) return; S.trainerXPs[t.dataset.txp]=v; render(true); }
+  else if(t.dataset.pl){ const [g,i]=t.dataset.pl.split(':'); const v=parseFloat(t.value); if(isNaN(v)||v<0||v>100) return; S.pl={...S.pl,[g]:S.pl[g].map((x,j)=>j===+i?v:x)}; render(true); }
   else if(t.dataset.avail){ S.avail[t.dataset.avail]=t.checked; render(true); }
 });
 document.addEventListener('change',e=>{ if(e.target.dataset.horse){ S.horse[e.target.dataset.horse]=+e.target.value; render(); } });
